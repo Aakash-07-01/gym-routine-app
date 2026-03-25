@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --color-gym-primary: #C8FF00;
+  --color-gym-surface: #111111;
+  --color-gym-surfaceElevated: #1A1A1A;
+  --color-gym-border: #2A2A2A;
+  --color-gym-accent: #FF3D00;
+  --color-gym-success: #00E676;
+
+  --color-gym-dark: #0A0A0A;
+  --color-gym-gray: #111111;
+  --color-gym-light: #2A2A2A;
+  --color-gym-blue: #C8FF00;
+  /* Mapped legacy to new primary */
+  --color-gym-green: #00E676;
+
+  --font-bebas: 'Bebas Neue', display;
+  --font-inter: 'Inter', sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-gym-dark);
+    color: white;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: var(--color-gym-dark);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--color-gym-light);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-gym-blue);
+  }
+}

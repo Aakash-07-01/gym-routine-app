@@ -1,0 +1,52 @@
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE splits (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT,
+    name VARCHAR(255) NOT NULL,
+    is_default BOOLEAN NOT NULL DEFAULT FALSE,
+    is_template BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE workout_days (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    split_id BIGINT NOT NULL,
+    day_name VARCHAR(255) NOT NULL,
+    day_order INT NOT NULL,
+    FOREIGN KEY (split_id) REFERENCES splits(id) ON DELETE CASCADE
+);
+
+CREATE TABLE exercises (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    day_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    sets INT,
+    reps INT,
+    weight DOUBLE,
+    notes TEXT,
+    order_index INT NOT NULL,
+    FOREIGN KEY (day_id) REFERENCES workout_days(id) ON DELETE CASCADE
+);
+
+CREATE TABLE workout_logs (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    day_id BIGINT NOT NULL,
+    completed_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (day_id) REFERENCES workout_days(id) ON DELETE CASCADE
+);
+
+CREATE TABLE youtube_cache (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    exercise_name VARCHAR(255) NOT NULL UNIQUE,
+    video_id VARCHAR(255) NOT NULL,
+    video_title VARCHAR(255) NOT NULL,
+    cached_at TIMESTAMP NOT NULL
+);

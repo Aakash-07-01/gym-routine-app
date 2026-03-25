@@ -1,0 +1,2 @@
+ALTER TABLE exercises ADD COLUMN is_done BOOLEAN DEFAULT FALSE;
+ALTER TABLE exercises ADD COLUMN rest_timer INT;
