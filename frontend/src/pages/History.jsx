@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import useAuthStore from '../store/authStore';
 import useGymStore from '../store/gymStore';
-import ActivityCalendar from 'react-activity-calendar';
+import { ActivityCalendar } from 'react-activity-calendar';
 import { motion } from 'framer-motion';
 
 export default function History() {
