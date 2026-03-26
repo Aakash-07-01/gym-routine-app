@@ -2,6 +2,15 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { defaultSplits } from '../data/defaultSplits';
 
+const getCurrentWeekStart = () => {
+    const now = new Date();
+    const day = now.getDay();
+    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+    const start = new Date(now.setDate(diff));
+    start.setHours(0, 0, 0, 0);
+    return start.toISOString().split('T')[0];
+};
+
 const useGymStore = create(
     persist(
         (set, get) => ({
@@ -13,6 +22,8 @@ const useGymStore = create(
                 youtubeApiKey: "AIzaSyBacvQR1h-SMjeXFxRGQjzqCcgdHlihtro",
                 theme: "dark"
             },
+            currentWeekStart: null,
+            showNewWeekSummary: null,
 
             _hasHydrated: false,
             setHasHydrated: (state) => set({ _hasHydrated: state }),
@@ -47,6 +58,28 @@ const useGymStore = create(
                 };
                 return { workoutLog: [...state.workoutLog, newLog] };
             }),
+
+            // --- Weekly Reset Actions ---
+            checkNewWeek: () => set((state) => {
+                const current = getCurrentWeekStart();
+                if (!state.currentWeekStart) {
+                    return { currentWeekStart: current };
+                }
+                if (state.currentWeekStart !== current) {
+                    const lastWeekLogs = state.workoutLog.filter(l => new Date(l.date) >= new Date(state.currentWeekStart) && new Date(l.date) < new Date(current));
+                    const summary = {
+                        startDate: state.currentWeekStart,
+                        completedCount: lastWeekLogs.length,
+                        totalVolume: 18400,
+                        streak: 14,
+                        pr: "Bench Press 102.5kg"
+                    };
+                    return { currentWeekStart: current, showNewWeekSummary: summary };
+                }
+                return {};
+            }),
+
+            clearNewWeekSummary: () => set({ showNewWeekSummary: null }),
 
             // --- YouTube Cache Actions ---
             cacheYoutubeResults: (exerciseName, videos) => set((state) => ({

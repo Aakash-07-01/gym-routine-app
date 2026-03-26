@@ -2,26 +2,35 @@
 
 @theme {
   --color-gym-primary: #C8FF00;
-  --color-gym-surface: #111111;
-  --color-gym-surfaceElevated: #1A1A1A;
-  --color-gym-border: #2A2A2A;
+  --color-gym-surface: rgba(17, 17, 17, 0.6);
+  --color-gym-surfaceElevated: rgba(26, 26, 26, 0.85);
+  --color-gym-border: rgba(255, 255, 255, 0.08);
   --color-gym-accent: #FF3D00;
   --color-gym-success: #00E676;
 
   --color-gym-dark: #0A0A0A;
-  --color-gym-gray: #111111;
-  --color-gym-light: #2A2A2A;
+  --color-gym-gray: rgba(17, 17, 17, 0.6);
+  --color-gym-light: rgba(42, 42, 42, 0.8);
   --color-gym-blue: #C8FF00;
   /* Mapped legacy to new primary */
   --color-gym-green: #00E676;
 
   --font-bebas: 'Bebas Neue', display;
   --font-inter: 'Inter', sans-serif;
+  --font-mono: 'DM Mono', monospace;
 }
 
 @layer base {
   body {
     background-color: var(--color-gym-dark);
+    /* Depth Layered Background */
+    background-image: 
+      radial-gradient(circle at 50% 0%, #1a1a1a 0%, #0a0a0a 70%),
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+    background-position: center top, center center, center center;
+    background-attachment: fixed;
     color: white;
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -29,13 +38,21 @@
 }
 
 @layer utilities {
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background-color: var(--color-gym-dark);
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
@@ -44,6 +61,6 @@
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--color-gym-blue);
+    background-color: var(--color-gym-primary);
   }
 }

@@ -12,10 +12,18 @@ import CustomSplitBuilder from './pages/CustomSplitBuilder';
 import useAuthStore from './store/authStore';
 import useGymStore from './store/gymStore';
 import { AnimatePresence } from 'framer-motion';
+import NewWeekModal from './components/NewWeekModal';
+import { useEffect } from 'react';
 
 function App() {
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-  const _hasHydrated = useGymStore(state => state._hasHydrated);
+  const { _hasHydrated, checkNewWeek, showNewWeekSummary } = useGymStore();
+
+  useEffect(() => {
+    if (_hasHydrated && isAuthenticated) {
+      checkNewWeek();
+    }
+  }, [_hasHydrated, isAuthenticated, checkNewWeek]);
 
   if (!_hasHydrated) {
     return (
@@ -45,6 +53,9 @@ function App() {
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
+      <AnimatePresence>
+        {showNewWeekSummary && <NewWeekModal summary={showNewWeekSummary} />}
+      </AnimatePresence>
     </Router>
   );
 }

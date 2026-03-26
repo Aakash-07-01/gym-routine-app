@@ -14,6 +14,16 @@ export const defaultSplits = [
         id: "ppl-6",
         name: "Push Pull Legs",
         isDefault: true,
+        // schedule mapping: 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat, 0=Sun
+        schedule: {
+            1: "ppl-day1",
+            2: "ppl-day2",
+            3: "ppl-day3",
+            4: "ppl-day4",
+            5: "ppl-day5",
+            6: "ppl-day6",
+            0: "rest"
+        },
         days: [
             {
                 id: "ppl-day1",
@@ -92,6 +102,15 @@ export const defaultSplits = [
         id: "ul-4",
         name: "Upper/Lower",
         isDefault: true,
+        schedule: {
+            1: "ul-day1",
+            2: "ul-day2",
+            3: "rest",
+            4: "ul-day3",
+            5: "ul-day4",
+            6: "rest",
+            0: "rest"
+        },
         days: [
             {
                 id: "ul-day1",
@@ -146,6 +165,15 @@ export const defaultSplits = [
         id: "arnold-6",
         name: "Arnold Split",
         isDefault: true,
+        schedule: {
+            1: "arn-day1",
+            2: "arn-day2",
+            3: "arn-day3",
+            4: "arn-day4",
+            5: "arn-day5",
+            6: "arn-day6",
+            0: "rest"
+        },
         days: [
             {
                 id: "arn-day1",
@@ -222,6 +250,15 @@ export const defaultSplits = [
         id: "bro-5",
         name: "Bro Split",
         isDefault: true,
+        schedule: {
+            1: "bro-day1",
+            2: "bro-day2",
+            3: "bro-day3",
+            4: "rest",
+            5: "bro-day4",
+            6: "bro-day5",
+            0: "rest"
+        },
         days: [
             {
                 id: "bro-day1",
@@ -289,10 +326,19 @@ export const defaultSplits = [
         id: "full-3",
         name: "Full Body",
         isDefault: true,
+        schedule: {
+            1: "fb-day1",
+            2: "rest",
+            3: "fb-day2",
+            4: "rest",
+            5: "fb-day3",
+            6: "rest",
+            0: "rest"
+        },
         days: [
             {
                 id: "fb-day1",
-                name: "Day A",
+                name: "Full Body A",
                 exercises: [
                     createEx("fb-d1-1", "Squat", 3, 5),
                     createEx("fb-d1-2", "Bench Press", 3, 5),
@@ -304,7 +350,7 @@ export const defaultSplits = [
             },
             {
                 id: "fb-day2",
-                name: "Day B",
+                name: "Full Body B",
                 exercises: [
                     createEx("fb-d2-1", "Front Squat", 3, 8),
                     createEx("fb-d2-2", "Incline Press", 3, 8),
@@ -316,7 +362,7 @@ export const defaultSplits = [
             },
             {
                 id: "fb-day3",
-                name: "Day C",
+                name: "Full Body C",
                 exercises: [
                     createEx("fb-d3-1", "Hack Squat", 3, 10),
                     createEx("fb-d3-2", "Dips", 3, "AMRAP"),
@@ -332,12 +378,21 @@ export const defaultSplits = [
         id: "531-4",
         name: "5/3/1 Powerlifting",
         isDefault: true,
+        schedule: {
+            1: "531-day1",
+            2: "rest",
+            3: "531-day2",
+            4: "rest",
+            5: "531-day3",
+            6: "531-day4",
+            0: "rest"
+        },
         days: [
             {
                 id: "531-day1",
                 name: "Press Day",
                 exercises: [
-                    createEx("531-d1-1", "Overhead Press (5/3/1 sets)", 3, "5/3/1"),
+                    createEx("531-d1-1", "Overhead Press", 3, "5/3/1"),
                     createEx("531-d1-2", "DB Overhead Press", 5, 10),
                     createEx("531-d1-3", "Lateral Raises", 3, 15),
                     createEx("531-d1-4", "Tricep Work", 3, 15),
@@ -348,7 +403,7 @@ export const defaultSplits = [
                 id: "531-day2",
                 name: "Deadlift Day",
                 exercises: [
-                    createEx("531-d2-1", "Deadlift (5/3/1 sets)", 3, "5/3/1"),
+                    createEx("531-d2-1", "Deadlift", 3, "5/3/1"),
                     createEx("531-d2-2", "Romanian Deadlift", 5, 10),
                     createEx("531-d2-3", "Leg Press", 3, 12),
                     createEx("531-d2-4", "Hanging Leg Raise", 3, 15)
@@ -358,7 +413,7 @@ export const defaultSplits = [
                 id: "531-day3",
                 name: "Bench Day",
                 exercises: [
-                    createEx("531-d3-1", "Bench Press (5/3/1 sets)", 3, "5/3/1"),
+                    createEx("531-d3-1", "Bench Press", 3, "5/3/1"),
                     createEx("531-d3-2", "Incline DB Press", 5, 10),
                     createEx("531-d3-3", "DB Row", 5, 10),
                     createEx("531-d3-4", "Bicep Curl", 3, 12),
@@ -369,7 +424,7 @@ export const defaultSplits = [
                 id: "531-day4",
                 name: "Squat Day",
                 exercises: [
-                    createEx("531-d4-1", "Squat (5/3/1 sets)", 3, "5/3/1"),
+                    createEx("531-d4-1", "Squat", 3, "5/3/1"),
                     createEx("531-d4-2", "Front Squat", 5, 10),
                     createEx("531-d4-3", "Leg Curl", 3, 12),
                     createEx("531-d4-4", "Calf Raises", 3, 15),
