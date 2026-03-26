@@ -15,6 +15,8 @@ import Confetti from 'react-confetti';
 import { Link } from 'react-router-dom';
 import RestDay from '../components/RestDay';
 import { defaultSplits } from '../data/defaultSplits';
+import CardioPromptModal from '../components/CardioPromptModal';
+import useAuthStore from '../store/authStore';
 
 function SortableExercise({ exercise, onToggle, onOpenVideo, isLocked, suggestion }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: exercise.id });
@@ -67,10 +69,6 @@ function SortableExercise({ exercise, onToggle, onOpenVideo, isLocked, suggestio
         </div>
     );
 }
-
-import { defaultSplits } from '../data/defaultSplits';
-import CardioPromptModal from '../components/CardioPromptModal';
-import useAuthStore from '../store/authStore';
 
 export default function Routine() {
     const { token } = useAuthStore();
