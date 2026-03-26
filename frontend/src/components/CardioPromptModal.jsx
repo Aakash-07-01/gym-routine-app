@@ -32,7 +32,7 @@ export default function CardioPromptModal({ isOpen, onClose }) {
 
         setIsSaving(true);
         try {
-            const res = await fetch('http://localhost:8080/api/cardio', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/cardio`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -28,18 +28,18 @@ export default function Dashboard() {
         // Only trigger on Sundays (0)
         if (new Date().getDay() !== 0) return;
 
-        const lastSeen = localStorage.getItem('gymos_weekly_seen');
+        const lastSeen = localStorage.getItem('gymjam_weekly_seen');
         const todayStr = new Date().toISOString().split('T')[0];
 
         if (lastSeen !== todayStr) {
             try {
-                const res = await fetch('http://localhost:8080/api/dashboard/weekly', {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/dashboard/weekly`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (res.ok) {
                     setWeeklyReport(await res.json());
                     setShowWeeklyModal(true);
-                    localStorage.setItem('gymos_weekly_seen', todayStr);
+                    localStorage.setItem('gymjam_weekly_seen', todayStr);
                 }
             } catch (e) { }
         }
@@ -47,7 +47,7 @@ export default function Dashboard() {
 
     const fetchDashboardStats = async () => {
         try {
-            const res = await fetch('http://localhost:8080/api/dashboard', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/dashboard`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!res.ok) throw new Error('Failed to fetch dashboard metrics');

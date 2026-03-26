@@ -45,7 +45,7 @@ export default function Register() {
 
             await register(payload);
             navigate('/');
-            toast.success('Registration complete! Welcome to GymOS.', { icon: '🚀' });
+            toast.success('Registration complete! Welcome to GYM-JAM.', { icon: '🚀' });
         } catch (error) {
             toast.error(error.message || 'Registration failed');
         }
@@ -59,7 +59,7 @@ export default function Register() {
         <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4">
             <div className="max-w-md w-full relative">
                 <h1 className="text-6xl font-bebas text-center text-[#ff0055] tracking-widest mb-2 drop-shadow-[0_0_15px_rgba(255,0,85,0.4)]">
-                    GYMOS
+                    GYM-JAM
                 </h1>
                 <p className="text-gray-400 font-mono text-center mb-10 text-sm tracking-widest uppercase">
                     Build Your Profile. Calibrate the Engine.
@@ -186,7 +186,7 @@ export default function Register() {
                             )}
 
                             <button type="submit" disabled={isLoading} className="flex-1 btn-3d-cyan text-black font-bebas text-2xl tracking-widest py-4 rounded-xl transition-transform disabled:opacity-50 uppercase">
-                                {isLoading ? 'Processing...' : (step === 3 ? 'INITIALIZE GYMOS' : 'CONTINUE')}
+                                {isLoading ? 'Processing...' : (step === 3 ? 'INITIALIZE GYM-JAM' : 'CONTINUE')}
                             </button>
                         </div>
                     </form>

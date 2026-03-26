@@ -19,7 +19,7 @@ export default function Notes() {
 
     const fetchNotes = async () => {
         try {
-            const res = await fetch('http://localhost:8080/api/notes', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/notes`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) setNotes(await res.json());
@@ -36,7 +36,7 @@ export default function Notes() {
 
         setIsSubmitting(true);
         try {
-            const res = await fetch('http://localhost:8080/api/notes', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/notes`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

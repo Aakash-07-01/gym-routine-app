@@ -25,7 +25,7 @@ export default function Progress() {
 
     const fetchMetrics = async () => {
         try {
-            const res = await fetch('http://localhost:8080/api/metrics', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/metrics`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -66,7 +66,7 @@ export default function Progress() {
         const calculatedBf = Math.max(3, Math.min(bfParams, 60)).toFixed(1);
 
         try {
-            const res = await fetch('http://localhost:8080/api/metrics', {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/metrics`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
