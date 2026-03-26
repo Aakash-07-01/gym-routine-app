@@ -52,7 +52,7 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Today's Workout Card with 3D Tilt */}
-                <div className={`transform perspective-[1000px] hover:rotate-x-2 hover:rotate-y-2 transition-transform duration-500 bg-gym-surfaceElevated border p-6 rounded-2xl shadow-xl relative overflow-hidden ${isLocked ? 'border-[#00E676] shadow-[0_0_20px_rgba(0,230,118,0.15)] bg-opacity-90 backdrop-blur-md' : 'border-gym-border'}`}>
+                <div className={`transform perspective-[1000px] hover:rotate-x-2 hover:rotate-y-2 transition-transform duration-500 card-3d p-8 relative overflow-hidden ${isLocked ? 'border-[#00E676] border-b-[#00E676] shadow-[0_20px_40px_rgba(0,230,118,0.2)] bg-opacity-90 backdrop-blur-md' : 'border-[#222]'}`}>
 
                     {isLocked && (
                         <div className="absolute top-0 right-0 bg-[#00E676] text-black font-bebas tracking-widest text-lg px-4 py-1 rounded-bl-xl z-10 shadow-lg">
@@ -60,14 +60,14 @@ export default function Dashboard() {
                         </div>
                     )}
 
-                    <h2 className="text-2xl font-bebas tracking-wide text-white mb-6">Today's Focus</h2>
+                    <h2 className="text-3xl font-bebas tracking-wide text-white mb-6">Today's Focus</h2>
                     {activeSplit && todaysDay ? (
                         <div className="space-y-6">
-                            <div className="p-5 bg-gym-surface rounded-xl border border-gym-border relative overflow-hidden group">
+                            <div className="p-5 card-3d-item border-[#222] relative overflow-hidden group">
                                 {/* Subtle inner glow effect */}
                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#C8FF00]/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                                <h3 className="text-xl font-bold uppercase text-[#C8FF00] tracking-wide">{todaysDay.name}</h3>
-                                <p className="text-gray-400 text-sm mt-1">{activeSplit.name}</p>
+                                <h3 className="text-2xl font-bebas uppercase text-[#C8FF00] tracking-wide">{todaysDay.name}</h3>
+                                <p className="text-gray-400 font-mono text-sm mt-1">{activeSplit.name}</p>
 
                                 {isLocked && (
                                     <div className="mt-4 pt-4 border-t border-[#00E676]/30 flex items-center justify-between">
@@ -79,15 +79,15 @@ export default function Dashboard() {
 
                             <Link
                                 to="/routine"
-                                className={`block w-full text-center font-bold tracking-wide py-4 rounded-xl transition-all ${isLocked ? 'bg-gym-surface border border-gym-border text-[#00E676] hover:bg-gym-gray' : 'bg-[#C8FF00] hover:bg-[#a6d900] text-black shadow-[0_4px_15px_rgba(200,255,0,0.3)] hover:shadow-[0_6px_20px_rgba(200,255,0,0.5)] transform active:scale-95'}`}
+                                className={`block w-full text-center font-bebas text-2xl tracking-widest py-4 rounded-xl transition-all ${isLocked ? 'bg-[#111] border-b-4 border-[#000] text-[#00E676] hover:translate-y-[-2px]' : 'btn-3d-lime'}`}
                             >
                                 {isLocked ? "SEE TODAY'S SESSION" : "START WORKOUT"}
                             </Link>
                         </div>
                     ) : (
-                        <div className="text-center py-10 bg-gym-surface rounded-xl border border-gym-border">
-                            <p className="text-gray-400 mb-4">No active routine found.</p>
-                            <Link to="/splits" className="text-[#C8FF00] hover:underline font-bold uppercase tracking-wide">
+                        <div className="text-center py-10 bg-[#111] rounded-xl border border-gym-border">
+                            <p className="text-gray-400 mb-4 font-mono">No active routine found.</p>
+                            <Link to="/splits" className="text-[#00E5FF] hover:underline font-bebas text-2xl tracking-wide">
                                 Browse Templates
                             </Link>
                         </div>
@@ -95,7 +95,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Weekly Progress Ring 3D */}
-                <div className="bg-gym-surface/20 backdrop-blur-xl border border-gym-border p-6 rounded-2xl shadow-xl flex flex-col items-center">
+                <div className="card-3d p-8 flex flex-col items-center">
                     <h2 className="text-2xl font-bebas tracking-wide text-white w-full">Weekly Streak</h2>
                     <div className="h-48 w-full mt-6 relative drop-shadow-[0_10px_10px_rgba(200,255,0,0.2)]">
                         <ResponsiveContainer width="100%" height="100%">
@@ -124,22 +124,22 @@ export default function Dashboard() {
             </div>
 
             {/* Quick Stats Row - Glassmorphism */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-2xl">
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Streak</p>
-                    <p className="text-3xl font-mono text-white">4 <span className="text-sm text-[#FF6B00]">🔥</span></p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
+                <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
+                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-2">Streak</p>
+                    <p className="text-4xl font-bebas text-white">4 <span className="text-sm text-[#FF6B00] mb-2 inline-block">🔥</span></p>
                 </div>
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-2xl">
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Total Vol</p>
-                    <p className="text-3xl font-mono text-white">12.4<span className="text-sm text-gray-400">t</span></p>
+                <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
+                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-2">Total Vol</p>
+                    <p className="text-4xl font-bebas text-white">12.4<span className="text-sm font-mono text-[#00E5FF] ml-1">t</span></p>
                 </div>
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-2xl">
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Sessions</p>
-                    <p className="text-3xl font-mono text-white">{workoutLog.length}</p>
+                <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
+                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-2">Sessions</p>
+                    <p className="text-4xl font-bebas text-white">{workoutLog.length}</p>
                 </div>
-                <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-5 rounded-2xl">
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Next Rest</p>
-                    <p className="text-3xl font-mono text-[#00E676]">Sun</p>
+                <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
+                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-2">Next Rest</p>
+                    <p className="text-4xl font-bebas text-[#FF0055]">Sun</p>
                 </div>
             </div>
         </motion.div>

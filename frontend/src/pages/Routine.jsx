@@ -14,6 +14,7 @@ import YoutubeModal from '../components/YoutubeModal';
 import Confetti from 'react-confetti';
 import { Link } from 'react-router-dom';
 import RestDay from '../components/RestDay';
+import { defaultSplits } from '../data/defaultSplits';
 
 function SortableExercise({ exercise, onToggle, onOpenVideo, isLocked }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: exercise.id });
@@ -21,42 +22,42 @@ function SortableExercise({ exercise, onToggle, onOpenVideo, isLocked }) {
     const isChecked = isLocked || exercise.completed;
 
     return (
-        <div ref={setNodeRef} style={style} className={`bg-gym-gray border p-4 rounded-xl flex flex-col sm:flex-row sm:items-center gap-4 transition-all duration-300 transform ${isChecked ? 'border-[#00E676] opacity-80' : 'border-gym-border'} ${isLocked ? 'cursor-not-allowed' : 'hover:scale-[1.01]'}`}>
+        <div ref={setNodeRef} style={style} className={`card-3d-item p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-4 transition-all duration-300 transform ${isChecked ? 'border-[#00E5FF]/40 border-b-[#00E5FF]/20 opacity-90 grayscale-[30%]' : 'hover:-translate-y-1 hover:border-[#FF0055]/50'} ${isLocked ? 'cursor-not-allowed' : ''}`}>
             <div className="flex items-center gap-4 w-full sm:w-auto">
                 <div {...attributes} {...listeners} className={`cursor-grab shrink-0 ${isLocked ? 'pointer-events-none opacity-0' : 'text-gray-500 hover:text-white'}`}>
                     <GripVertical size={20} />
                 </div>
 
-                <button onClick={() => onToggle(exercise.id)} className={`transition-transform active:scale-95 shrink-0 ${isLocked ? 'cursor-not-allowed cursor-default' : 'text-[#C8FF00]'}`}>
-                    {isChecked ? <CheckCircle size={24} className="text-[#00E676]" /> : <Circle size={24} className="text-gray-400 hover:text-white" />}
+                <button onClick={() => onToggle(exercise.id)} className={`transition-transform active:scale-95 shrink-0 ${isLocked ? 'cursor-not-allowed cursor-default' : 'text-[#00E5FF]'}`}>
+                    {isChecked ? <CheckCircle size={28} className="text-[#00E5FF] drop-shadow-[0_0_8px_rgba(0,229,255,0.6)]" /> : <Circle size={28} className="text-gray-400 hover:text-white" />}
                 </button>
                 <div className="flex-1 sm:hidden">
-                    <h4 className={`text-base font-bold uppercase transition-all ${isChecked ? 'line-through text-gray-400' : 'text-white'}`}>
+                    <h4 className={`text-base font-bold uppercase tracking-wider transition-all ${isChecked ? 'line-through text-gray-500' : 'text-white drop-shadow-sm'}`}>
                         {exercise.name}
                     </h4>
                 </div>
-                <button onClick={onOpenVideo} className="text-[#C8FF00] hover:text-white p-2 sm:hidden shrink-0 ml-auto" title="Watch Tutorial">
-                    <PlayCircle size={24} />
+                <button onClick={onOpenVideo} className="text-[#FF0055] hover:text-white p-2 sm:hidden shrink-0 ml-auto" title="Watch Tutorial">
+                    <PlayCircle size={28} />
                 </button>
             </div>
 
             <div className="flex-1 hidden sm:block ml-2">
-                <h4 className={`text-xl font-bebas tracking-wide uppercase transition-all ${isChecked ? 'line-through text-gray-500' : 'text-white'}`}>
+                <h4 className={`text-2xl font-bebas tracking-widest uppercase transition-all ${isChecked ? 'line-through text-gray-600' : 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]'}`}>
                     {exercise.name}
                 </h4>
-                <p className="text-sm font-mono text-gray-400 mt-1">
+                <p className="text-sm font-mono text-[#C8FF00] font-bold mt-1 tracking-widest">
                     {exercise.sets} SETS × {exercise.reps} REPS {exercise.weight ? `| ${exercise.weight}` : ''}
                 </p>
             </div>
 
-            <div className="sm:hidden pl-12">
-                <p className="text-sm font-mono text-gray-400">
+            <div className="sm:hidden pl-12 mt-1">
+                <p className="text-sm font-mono text-[#C8FF00] font-bold tracking-widest">
                     {exercise.sets} SETS × {exercise.reps} REPS {exercise.weight ? `| ${exercise.weight}` : ''}
                 </p>
             </div>
 
-            <button onClick={onOpenVideo} className="text-[#C8FF00] hover:text-white p-2 hidden sm:block shrink-0" title="Watch Tutorial">
-                <PlayCircle size={28} />
+            <button onClick={onOpenVideo} className="text-[#FF0055] hover:text-white hover:scale-110 transition-transform p-3 hidden sm:block shrink-0 drop-shadow-[0_0_10px_rgba(255,0,85,0.3)]" title="Watch Tutorial">
+                <PlayCircle size={32} />
             </button>
         </div>
     );
@@ -64,12 +65,22 @@ function SortableExercise({ exercise, onToggle, onOpenVideo, isLocked }) {
 
 export default function Routine() {
     const { activeSplitId, splits, logWorkout, workoutLog } = useGymStore();
-    const activeSplit = splits.find(s => s.id === activeSplitId);
+    const activeSplitRaw = splits.find(s => s.id === activeSplitId);
+
+    // FIX: Fallback to reading fresh schedule mapped default data if missing from older saved localStorage state.
+    const activeSplit = activeSplitRaw?.isDefault ? (defaultSplits.find(s => s.id === activeSplitRaw.id) || activeSplitRaw) : activeSplitRaw;
+
+    // Safety fallback for custom templates
+    const getFallbackSchedule = (days) => {
+        if (!days || days.length === 0) return ['rest', 'rest', 'rest', 'rest', 'rest', 'rest', 'rest'];
+        return [0, 1, 2, 3, 4, 5, 6].map(i => days[i % days.length]?.id || 'rest');
+    };
+    const activeSchedule = activeSplit?.schedule || getFallbackSchedule(activeSplit?.days);
 
     const todayIndex = new Date().getDay();
     const [selectedDayIndex, setSelectedDayIndex] = useState(todayIndex);
 
-    const scheduledDayId = activeSplit?.schedule ? activeSplit.schedule[selectedDayIndex] : null;
+    const scheduledDayId = activeSchedule[selectedDayIndex];
     const isRestDay = scheduledDayId === 'rest';
 
     const [exercises, setExercises] = useState([]);
@@ -96,9 +107,9 @@ export default function Routine() {
 
     if (!activeSplit) {
         return (
-            <div className="text-center py-20 flex flex-col items-center">
-                <p className="text-gray-400 mb-6 text-xl">No active routine selected.</p>
-                <Link to="/splits" className="bg-[#C8FF00] text-black font-bebas text-2xl tracking-widest py-4 px-10 rounded-full hover:scale-105 transition-transform shadow-[0_0_20px_rgba(200,255,0,0.3)]">
+            <div className="text-center py-24 flex flex-col items-center">
+                <p className="text-gray-400 font-mono mb-8 text-xl">No active routine selected.</p>
+                <Link to="/splits" className="btn-3d-cyan text-black font-bebas text-3xl tracking-widest py-4 px-12 rounded-xl transition-transform">
                     Find a Routine
                 </Link>
             </div>
@@ -120,8 +131,7 @@ export default function Routine() {
     const handleToggle = (id) => {
         if (isViewingTodaysCompletedLog) return;
         if (selectedDayIndex !== todayIndex) {
-            // Cannot modify non-today. Can just toggle view state visually if wanted, but best to block.
-            toast('You can only track today\'s workout.', { icon: 'ℹ️', style: { borderRadius: '10px', background: '#333', color: '#fff' } });
+            toast('You can only track today\'s workout.', { icon: 'ℹ️', style: { borderRadius: '10px', background: '#333', color: '#00E5FF' } });
             return;
         }
         if (isLockedToday) {
@@ -142,8 +152,8 @@ export default function Routine() {
             return;
         }
 
-        const dayName = activeSplit.days.find(d => d.id === scheduledDayId).name;
-        toast.success(`${dayName} Completed!`, { icon: '🔥' });
+        const dayName = activeSplit.days.find(d => d.id === scheduledDayId)?.name || 'Workout';
+        toast.success(`${dayName} Completed!`, { icon: '🔥', style: { borderRadius: '12px', background: '#00E5FF', color: '#000', fontWeight: 'bold' } });
         setExercises(items => items.map(ex => ({ ...ex, completed: true })));
         logWorkout(activeSplit.id, scheduledDayId);
 
@@ -153,8 +163,7 @@ export default function Routine() {
 
     const isAllComplete = exercises.length > 0 && exercises.every(ex => ex.completed);
 
-    // Find Next Day Name for the Lock Modal
-    const nextDayId = activeSplit.schedule ? activeSplit.schedule[(todayIndex + 1) % 7] : null;
+    const nextDayId = activeSchedule[(todayIndex + 1) % 7];
     const nextDayName = nextDayId === 'rest' ? 'Rest Day 💤' : (activeSplit.days.find(d => d.id === nextDayId)?.name || 'Next Workout');
 
     const weekDaysList = [
@@ -168,65 +177,65 @@ export default function Routine() {
     ];
 
     return (
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="max-w-4xl mx-auto space-y-8 relative pb-24">
-            {showConfetti && <div className="fixed inset-0 z-50 pointer-events-none"><Confetti recycle={false} numberOfPieces={600} gravity={0.15} /></div>}
+        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="max-w-5xl mx-auto space-y-10 relative pb-32">
+            {showConfetti && <div className="fixed inset-0 z-50 pointer-events-none"><Confetti recycle={false} numberOfPieces={800} gravity={0.2} colors={['#C8FF00', '#00E5FF', '#FF0055']} /></div>}
 
             {/* Lock Modal Overlay */}
             <AnimatePresence>
                 {showLockModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setShowLockModal(false)} />
-                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 20 }} className="relative bg-gym-surfaceElevated border border-gym-border p-8 rounded-3xl max-w-sm w-full shadow-[0_20px_50px_rgba(0,0,0,0.8)] text-center">
-                            <button onClick={() => setShowLockModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24} /></button>
-                            <span className="text-6xl mb-4 block">💪</span>
-                            <h2 className="text-3xl font-bebas text-white tracking-widest mb-4">You've already crushed today's workout!</h2>
-                            <p className="text-gray-400 mb-6 font-medium">Come back tomorrow for <strong className="text-[#C8FF00]">{nextDayName}</strong>. Rest, recover, and grow.</p>
-                            <button onClick={() => setShowLockModal(false)} className="w-full bg-[#C8FF00] text-black font-bold uppercase tracking-wide py-3 rounded-xl hover:bg-[#a6d900] transition-colors">Understood, Boss</button>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={() => setShowLockModal(false)} />
+                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 30 }} className="relative card-3d p-10 max-w-md w-full text-center">
+                            <button onClick={() => setShowLockModal(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white bg-black p-2 rounded-full"><X size={20} /></button>
+                            <span className="text-[80px] mb-4 block drop-shadow-xl">💪</span>
+                            <h2 className="text-4xl font-bebas text-white tracking-widest mb-4">You've already crushed today's workout!</h2>
+                            <p className="text-gray-400 mb-8 font-mono text-sm leading-relaxed">Come back tomorrow for <strong className="text-[#00E5FF] text-base">{nextDayName}</strong>.<br />Rest, recover, and grow.</p>
+                            <button onClick={() => setShowLockModal(false)} className="w-full btn-3d-cyan text-black font-bebas text-2xl tracking-widest py-4 rounded-xl">Understood, Boss</button>
                         </motion.div>
                     </div>
                 )}
             </AnimatePresence>
 
-            <header className="flex justify-between items-end">
+            <header className="flex justify-between items-end bg-gym-surfaceElevated p-6 rounded-[2rem] border-b-4 border-gym-border shadow-2xl">
                 <div>
-                    <h1 className="text-5xl font-bebas text-white tracking-widest uppercase mb-1 drop-shadow-md">{activeSplit.name}</h1>
-                    <p className="text-gray-400">Track your weekly scheduled workouts and rest days.</p>
+                    <h1 className="text-6xl font-bebas text-[#C8FF00] tracking-widest uppercase mb-2 drop-shadow-[0_2px_10px_rgba(200,255,0,0.3)]">{activeSplit.name}</h1>
+                    <p className="text-gray-300 font-mono tracking-wider text-sm">Track your weekly scheduled workouts and rest days.</p>
                 </div>
             </header>
 
-            {/* Horizontal Week Strip (7 Days) */}
-            <div className="flex overflow-x-auto gap-4 pb-4 snap-x hide-scrollbar">
+            {/* Horizontal Week Strip (7 Days) - 3D Blocks */}
+            <div className="flex overflow-x-auto gap-5 pb-8 pt-4 snap-x hide-scrollbar px-2">
                 {weekDaysList.map((wd) => {
                     const isActive = wd.index === selectedDayIndex;
-                    const mappedDayId = activeSplit.schedule ? activeSplit.schedule[wd.index] : null;
+                    const mappedDayId = activeSchedule[wd.index];
                     const isRest = mappedDayId === 'rest';
-                    const activeDayTitle = isRest ? "Rest Day" : (activeSplit.days.find(d => d.id === mappedDayId)?.name || 'Unknown');
+                    const activeDayTitle = isRest ? "REST" : (activeSplit.days.find(d => d.id === mappedDayId)?.name || 'Unknown');
                     const isPassedCompleted = isLockedToday && wd.index === todayIndex;
 
-                    let bgClass = 'bg-gym-surface/50 border-gym-border hover:border-gray-500 hover:bg-gym-surface text-white';
-                    let titleColor = 'text-white';
+                    let structuralClass = 'bg-[#151515] border-2 border-[#222] border-b-4 border-b-[#000] text-gray-500 hover:translate-y-[-2px] hover:border-[#444]';
+                    let titleColor = 'text-gray-400';
 
                     if (isActive) {
                         if (isRest) {
-                            bgClass = 'bg-blue-900/30 border-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.3)] scale-105 text-white';
-                            titleColor = 'text-blue-400';
+                            structuralClass = 'bg-[#1A1A1A] border-2 border-l-[#FF0055]/50 border-t-[#FF0055]/50 border-r-[#AA0039] border-b-6 border-b-[#AA0039] text-white shadow-[0_15px_30px_rgba(255,0,85,0.4)] scale-105 -translate-y-1';
+                            titleColor = 'text-[#FF0055] drop-shadow-[0_0_8px_rgba(255,0,85,0.8)]';
                         } else {
-                            bgClass = 'bg-gym-surface border-[#C8FF00] shadow-[0_0_15px_rgba(200,255,0,0.15)] scale-105';
-                            titleColor = 'text-[#C8FF00]';
+                            structuralClass = 'bg-[#1A1A1A] border-2 border-l-[#00E5FF]/50 border-t-[#00E5FF]/50 border-r-[#0099AA] border-b-6 border-b-[#0099AA] text-white shadow-[0_15px_30px_rgba(0,229,255,0.3)] scale-105 -translate-y-1';
+                            titleColor = 'text-[#00E5FF] drop-shadow-[0_0_8px_rgba(0,229,255,0.8)]';
                         }
                     } else if (isRest) {
-                        titleColor = 'text-blue-400/70';
+                        titleColor = 'text-[#FF0055]/50';
                     }
 
                     return (
                         <button
                             key={wd.index}
                             onClick={() => setSelectedDayIndex(wd.index)}
-                            className={`snap-center shrink-0 min-w-[130px] p-4 rounded-2xl border text-left transition-all duration-300 transform ${bgClass}`}
+                            className={`snap-center shrink-0 min-w-[140px] px-5 py-6 rounded-2xl text-left transition-all duration-300 transform ${structuralClass}`}
                         >
-                            <span className="text-xs text-gray-500 uppercase tracking-widest block mb-1">{wd.label} {wd.index === todayIndex ? "(Today)" : ""}</span>
-                            <h3 className={`font-bebas text-2xl tracking-wide uppercase leading-none ${titleColor}`}>{activeDayTitle}</h3>
-                            {isPassedCompleted && !isRest && <p className="text-xs text-[#00E676] font-bold mt-2 uppercase">Completed</p>}
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest block mb-2">{wd.label} {wd.index === todayIndex ? "• TODAY" : ""}</span>
+                            <h3 className={`font-bebas text-3xl tracking-widest uppercase leading-none ${titleColor} break-words whitespace-normal`}>{activeDayTitle}</h3>
+                            {isPassedCompleted && !isRest && <div className="mt-4 bg-[#00E5FF]/20 border border-[#00E5FF]/50 text-[#00E5FF] px-2 py-1 rounded inline-block text-[10px] font-bold uppercase tracking-widest">Completed</div>}
                         </button>
                     )
                 })}
@@ -236,30 +245,30 @@ export default function Routine() {
             {isRestDay ? (
                 <RestDay />
             ) : (
-                <div className={`transform perspective-[1000px] hover:rotate-x-1 transition-transform duration-700 bg-gym-surface/30 backdrop-blur-md border p-6 sm:p-8 rounded-3xl shadow-2xl ${isViewingTodaysCompletedLog ? 'border-[#00E676]/50 shadow-[0_0_30px_rgba(0,230,118,0.1)]' : (isAllComplete ? 'border-[#C8FF00]' : 'border-gym-border')}`}>
-                    <div className="flex justify-between items-center mb-8 border-b border-gym-border pb-6 flex-wrap gap-4">
-                        <h2 className="text-3xl font-bebas uppercase text-white tracking-widest">{activeSplit.days.find(d => d.id === scheduledDayId)?.name}</h2>
+                <div className={`card-3d p-6 sm:p-10 ${isViewingTodaysCompletedLog ? 'border-[#00E5FF] shadow-[0_20px_40px_rgba(0,229,255,0.2)]' : (isAllComplete ? 'border-[#C8FF00]' : '')}`}>
+                    <div className="flex justify-between items-center mb-10 border-b-2 border-[#222] pb-6 flex-wrap gap-4">
+                        <h2 className="text-4xl font-bebas uppercase text-white tracking-widest drop-shadow-md">{activeSplit.days.find(d => d.id === scheduledDayId)?.name}</h2>
 
                         {selectedDayIndex === todayIndex && (
                             <button
                                 onClick={handleCompleteDay}
                                 disabled={exercises.length === 0 || isViewingTodaysCompletedLog}
-                                className={`font-bebas text-xl tracking-widest uppercase py-3 px-8 rounded-xl transition-all ${isViewingTodaysCompletedLog ? 'bg-gym-surface border border-[#00E676] text-[#00E676] cursor-not-allowed opacity-80' : 'bg-[#C8FF00] text-black hover:bg-[#a6d900] active:scale-95 shadow-[0_4px_15px_rgba(200,255,0,0.3)]'} disabled:opacity-50`}
+                                className={`text-black font-bebas text-2xl tracking-widest uppercase px-10 py-3 rounded-xl ${isViewingTodaysCompletedLog ? 'bg-[#00E5FF] shadow-[0_4px_0_0_#0099AA] opacity-70 cursor-not-allowed hover:none translate-y-1' : 'btn-3d-lime'}`}
                             >
-                                {isViewingTodaysCompletedLog ? 'SEE SESSION (LOCKED)' : 'COMPLETE DAY'}
+                                {isViewingTodaysCompletedLog ? 'SESSION LOCKED' : 'COMPLETE DAY'}
                             </button>
                         )}
                         {selectedDayIndex !== todayIndex && (
-                            <span className="text-gray-500 font-bebas tracking-widest text-lg uppercase bg-black/20 px-4 py-2 rounded-lg">View Only</span>
+                            <span className="text-gray-500 font-bebas tracking-widest text-xl uppercase bg-black px-6 py-3 rounded-xl border-b-4 border-[#111]">View Only</span>
                         )}
                     </div>
 
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                         <SortableContext items={exercises} strategy={verticalListSortingStrategy}>
-                            <div className="space-y-4">
+                            <div className="space-y-5">
                                 <AnimatePresence>
                                     {exercises.map(exercise => (
-                                        <motion.div key={exercise.id} layout initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.9 }}>
+                                        <motion.div key={exercise.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }}>
                                             <SortableExercise
                                                 exercise={exercise}
                                                 onToggle={handleToggle}
@@ -270,8 +279,8 @@ export default function Routine() {
                                     ))}
                                 </AnimatePresence>
                                 {exercises.length === 0 && (
-                                    <div className="text-center py-16 bg-gym-surface rounded-2xl border border-dashed border-gym-border">
-                                        <p className="text-gray-500 font-mono">No exercises found for this day.</p>
+                                    <div className="text-center py-20 bg-black/40 rounded-3xl border-2 border-dashed border-[#333]">
+                                        <p className="text-gray-500 font-mono tracking-widest text-lg">NO EXERCISES FOUND</p>
                                     </div>
                                 )}
                             </div>
