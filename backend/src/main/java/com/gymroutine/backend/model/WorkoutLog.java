@@ -17,18 +17,18 @@ public class WorkoutLog {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "day_id", nullable = false)
+    @JoinColumn(name = "day_id", nullable = true)
     private WorkoutDay workoutDay;
 
     @Column(name = "completed_at", nullable = false)
     private LocalDateTime completedAt;
 
-    @Transient
+    @Column(name = "day_name")
     private String dayName;
 
     @PostLoad
     protected void onLoad() {
-        if (workoutDay != null) {
+        if (workoutDay != null && dayName == null) {
             dayName = workoutDay.getDayName();
         }
     }

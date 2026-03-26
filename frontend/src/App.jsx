@@ -7,6 +7,9 @@ import Register from './pages/Register';
 import Routine from './pages/Routine';
 import Templates from './pages/Templates';
 import History from './pages/History';
+import Progress from './pages/Progress';
+import Notes from './pages/Notes';
+import Nutrition from './pages/Nutrition';
 import Settings from './pages/Settings';
 import CustomSplitBuilder from './pages/CustomSplitBuilder';
 import useAuthStore from './store/authStore';
@@ -50,6 +53,9 @@ function App() {
           <Route path="builder" element={<CustomSplitBuilder />} />
           <Route path="builder/:sourceId" element={<CustomSplitBuilder />} />
           <Route path="history" element={<History />} />
+          <Route path="progress" element={<Progress />} />
+          <Route path="notes" element={<Notes />} />
+          <Route path="nutrition" element={<Nutrition />} />
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>

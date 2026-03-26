@@ -32,8 +32,17 @@ public class AuthService {
                         throw new RuntimeException("Username already exists");
                 }
                 var user = User.builder()
+                                .fullName(request.getFullName())
                                 .username(request.getUsername())
+                                .email(request.getEmail())
                                 .password(passwordEncoder.encode(request.getPassword()))
+                                .dob(request.getDob())
+                                .biologicalSex(request.getBiologicalSex())
+                                .height(request.getHeight())
+                                .startingWeight(request.getStartingWeight())
+                                .primaryGoal(request.getPrimaryGoal())
+                                .experienceLevel(request.getExperienceLevel())
+                                .unitPreference(request.getUnitPreference())
                                 .build();
                 repository.save(user);
                 var jwtToken = jwtService.generateToken(user);

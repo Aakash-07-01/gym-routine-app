@@ -1,146 +1,215 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { motion } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../store/authStore';
-import useGymStore from '../store/gymStore';
+import toast from 'react-hot-toast';
 
 export default function Dashboard() {
-    const user = useAuthStore(state => state.user);
-    const { activeSplitId, splits, workoutLog } = useGymStore();
+    const { user, token, logout } = useAuthStore();
+    const navigate = useNavigate();
 
-    const activeSplit = splits.find(s => s.id === activeSplitId) || null;
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
+    // Weekly Report
+    const [weeklyReport, setWeeklyReport] = useState(null);
+    const [showWeeklyModal, setShowWeeklyModal] = useState(false);
 
-    const completedDaysThisWeek = workoutLog.filter(log => {
-        const logDate = new Date(log.date);
-        return logDate >= startOfWeek;
-    }).length;
+    useEffect(() => {
+        if (!token) {
+            navigate('/register');
+        } else {
+            fetchDashboardStats();
+            checkWeeklySummary();
+        }
+    }, [token, navigate]);
 
-    const totalDays = activeSplit ? activeSplit.days.length : 7;
-    const completedDays = Math.min(completedDaysThisWeek, totalDays);
-    const todaysDay = activeSplit ? activeSplit.days[completedDays % activeSplit.days.length] : null;
+    const checkWeeklySummary = async () => {
+        // Only trigger on Sundays (0)
+        if (new Date().getDay() !== 0) return;
 
-    const todayStr = new Date().toISOString().split('T')[0];
-    const todayLog = workoutLog.find(l => l.date === todayStr);
-    const isLocked = !!todayLog;
+        const lastSeen = localStorage.getItem('gymos_weekly_seen');
+        const todayStr = new Date().toISOString().split('T')[0];
 
-    const data = [
-        { name: 'Completed', value: completedDays },
-        { name: 'Remaining', value: Math.max(0, totalDays - completedDays) },
-    ];
-    // Using GymOS V4 Aesthetics
-    const COLORS = ['#C8FF00', '#222222'];
+        if (lastSeen !== todayStr) {
+            try {
+                const res = await fetch('http://localhost:8080/api/dashboard/weekly', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    setWeeklyReport(await res.json());
+                    setShowWeeklyModal(true);
+                    localStorage.setItem('gymos_weekly_seen', todayStr);
+                }
+            } catch (e) { }
+        }
+    };
+
+    const fetchDashboardStats = async () => {
+        try {
+            const res = await fetch('http://localhost:8080/api/dashboard', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error('Failed to fetch dashboard metrics');
+            const json = await res.json();
+            setStats(json);
+        } catch (err) {
+            toast.error("Could not load backend metrics.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-[#00E5FF]"></div>
+            </div>
+        );
+    }
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="space-y-8 max-w-4xl mx-auto"
-        >
-            <header className="flex justify-between items-end mb-4 block">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-24">
+
+            {/* Weekly Summary Modal */}
+            <AnimatePresence>
+                {showWeeklyModal && weeklyReport && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setShowWeeklyModal(false)} />
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0, rotateX: 20 }}
+                            animate={{ scale: 1, opacity: 1, rotateX: 0 }}
+                            exit={{ scale: 0.8, opacity: 0, rotateX: -20 }}
+                            className="relative bg-[#111] p-10 max-w-lg w-full text-center border-t-4 border-t-[#C8FF00] border-l-4 border-l-[#C8FF00] shadow-[10px_10px_0_0_#C8FF00] rounded-xl"
+                        >
+                            <h2 className="text-6xl font-bebas text-white uppercase tracking-widest leading-none drop-shadow-md">Sunday Recap</h2>
+                            <p className="text-gray-400 font-mono text-sm tracking-widest uppercase mt-4 mb-8">Performance initialized and verified.</p>
+
+                            <div className="grid grid-cols-2 gap-4 mb-8">
+                                <div className="bg-[#1a1a1a] p-6 border-b-2 border-[#C8FF00]">
+                                    <p className="text-5xl font-bebas text-[#C8FF00]">{weeklyReport.workoutsCompleted}</p>
+                                    <p className="text-xs font-mono text-gray-400 mt-2 uppercase">Workouts</p>
+                                </div>
+                                <div className="bg-[#1a1a1a] p-6 border-b-2 border-[#00E5FF]">
+                                    <p className="text-5xl font-bebas text-[#00E5FF]">{weeklyReport.prsHit}</p>
+                                    <p className="text-xs font-mono text-gray-400 mt-2 uppercase">New PRs</p>
+                                </div>
+                                <div className="bg-[#1a1a1a] p-6 border-b-2 border-[#FF0055] col-span-2">
+                                    <p className="text-5xl font-bebas text-[#FF0055]">{Math.round(weeklyReport.caloriesBurned)}<span className="text-xl">kcal</span></p>
+                                    <p className="text-xs font-mono text-gray-400 mt-2 uppercase">Cardio Calories Banished</p>
+                                </div>
+                            </div>
+
+                            <button onClick={() => setShowWeeklyModal(false)} className="w-full btn-3d-cyan text-black font-bebas text-3xl tracking-widest py-4 uppercase">Continue Training</button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Header */}
+            <header className="flex justify-between items-end mb-4 border-b-2 border-[#222] pb-6">
                 <div>
-                    <h1 className="text-4xl font-bebas text-white tracking-wide">Welcome back, {user?.username || 'Athlete'}</h1>
-                    <p className="text-gray-400 mt-1">{"Let's crush today's goals."}</p>
+                    <h1 className="text-5xl font-bebas text-white tracking-widest uppercase drop-shadow-md">
+                        Welcome back, <span className="text-[#00E5FF]">{user?.fullName || user?.username || 'Athlete'}</span>
+                    </h1>
+                    <p className="text-gray-400 mt-2 font-mono tracking-widest text-sm uppercase">Engine Calibrated. Ready for Session.</p>
                 </div>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Today's Workout Card with 3D Tilt */}
-                <div className={`transform perspective-[1000px] hover:rotate-x-2 hover:rotate-y-2 transition-transform duration-500 card-3d p-8 relative overflow-hidden ${isLocked ? 'border-[#00E676] border-b-[#00E676] shadow-[0_20px_40px_rgba(0,230,118,0.2)] bg-opacity-90 backdrop-blur-md' : 'border-[#222]'}`}>
-
-                    {isLocked && (
-                        <div className="absolute top-0 right-0 bg-[#00E676] text-black font-bebas tracking-widest text-lg px-4 py-1 rounded-bl-xl z-10 shadow-lg">
-                            COMPLETED
-                        </div>
-                    )}
-
-                    <h2 className="text-3xl font-bebas tracking-wide text-white mb-6">Today's Focus</h2>
-                    {activeSplit && todaysDay ? (
-                        <div className="space-y-6">
-                            <div className="p-5 card-3d-item border-[#222] relative overflow-hidden group">
-                                {/* Subtle inner glow effect */}
-                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#C8FF00]/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                                <h3 className="text-2xl font-bebas uppercase text-[#C8FF00] tracking-wide">{todaysDay.name}</h3>
-                                <p className="text-gray-400 font-mono text-sm mt-1">{activeSplit.name}</p>
-
-                                {isLocked && (
-                                    <div className="mt-4 pt-4 border-t border-[#00E676]/30 flex items-center justify-between">
-                                        <p className="text-[#00E676] font-mono text-sm">Completed at {new Date(todayLog.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                        <div className="w-2 h-2 rounded-full bg-[#00E676] shadow-[0_0_8px_#00E676]"></div>
-                                    </div>
-                                )}
-                            </div>
-
-                            <Link
-                                to="/routine"
-                                className={`block w-full text-center font-bebas text-2xl tracking-widest py-4 rounded-xl transition-all ${isLocked ? 'bg-[#111] border-b-4 border-[#000] text-[#00E676] hover:translate-y-[-2px]' : 'btn-3d-lime'}`}
-                            >
-                                {isLocked ? "SEE TODAY'S SESSION" : "START WORKOUT"}
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="text-center py-10 bg-[#111] rounded-xl border border-gym-border">
-                            <p className="text-gray-400 mb-4 font-mono">No active routine found.</p>
-                            <Link to="/splits" className="text-[#00E5FF] hover:underline font-bebas text-2xl tracking-wide">
-                                Browse Templates
-                            </Link>
-                        </div>
+                {/* Motivation / AI Insight Card */}
+                <div className="card-3d p-8 relative overflow-hidden bg-[#111] border-l-[#FF0055]/50 border-t-[#FF0055]/50 group">
+                    <div className="absolute top-0 right-0 bg-[#FF0055] text-white font-bebas tracking-widest text-sm px-4 py-1 rounded-bl-xl shadow-[0_0_15px_rgba(255,0,85,0.6)]">
+                        AI INSIGHT
+                    </div>
+                    <h2 className="text-3xl font-bebas tracking-widest text-white mb-6">Daily Analysis</h2>
+                    <div className="p-5 card-3d-item border-[#222]">
+                        <p className="text-gray-300 font-mono text-sm leading-relaxed tracking-wide">
+                            {data?.aiInsight ? data.aiInsight : "You haven't logged any notes recently. Track your energy to generate insights."}
+                        </p>
+                    </div>
+                    {!data?.aiInsight && (
+                        <Link to="/notes" className="inline-block mt-4 text-[#FF0055] hover:text-white font-bebas text-xl tracking-widest uppercase transition-colors">
+                            Log a Note ➔
+                        </Link>
                     )}
                 </div>
 
-                {/* Weekly Progress Ring 3D */}
-                <div className="card-3d p-8 flex flex-col items-center">
-                    <h2 className="text-2xl font-bebas tracking-wide text-white w-full">Weekly Streak</h2>
-                    <div className="h-48 w-full mt-6 relative drop-shadow-[0_10px_10px_rgba(200,255,0,0.2)]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={data}
-                                    innerRadius={70}
-                                    outerRadius={90}
-                                    paddingAngle={5}
-                                    stroke="none"
-                                    cornerRadius={8}
-                                    dataKey="value"
-                                >
-                                    {data.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                            </PieChart>
-                        </ResponsiveContainer>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className="text-4xl font-bebas text-white tracking-wider">{completedDays}<span className="text-[#C8FF00]">/</span>{totalDays}</span>
-                            <span className="text-xs text-gray-400 uppercase tracking-widest font-bold mt-1">Days</span>
+                {/* Today's Workout Focus */}
+                <div className="card-3d p-8 relative overflow-hidden bg-[#111] border-l-[#00E5FF]/50 border-t-[#00E5FF]/50 group">
+                    <h2 className="text-3xl font-bebas tracking-widest text-white mb-6">Current Focus</h2>
+                    <div className="flex flex-col h-full justify-between pb-8">
+                        <div className="space-y-4">
+                            <h3 className="text-4xl font-bebas uppercase text-[#00E5FF] tracking-widest drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]">
+                                {data?.todaysFocus || "Rest Day"}
+                            </h3>
+                            <p className="text-gray-400 font-mono text-sm">Next Session: Automatic</p>
+                        </div>
+                        <div className="mt-8">
+                            <Link to="/routine" className="block w-full text-center btn-3d-cyan text-black font-bebas text-2xl tracking-widest py-4 rounded-xl uppercase">
+                                ENTER WORKOUT
+                            </Link>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Quick Stats Row - Glassmorphism */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
+            {/* Core Metrics Grid */}
+            <h2 className="text-4xl font-bebas text-white tracking-widest mt-12 mb-6 uppercase border-b-2 border-[#222] pb-4">Biometrics & Output</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+
+                {/* Calories */}
                 <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-2">Streak</p>
-                    <p className="text-4xl font-bebas text-white">4 <span className="text-sm text-[#FF6B00] mb-2 inline-block">🔥</span></p>
+                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3 block">Energy Output</p>
+                    {data?.caloriesBurnedToday ? (
+                        <p className="text-5xl font-bebas text-[#C8FF00]">{Math.round(data.caloriesBurnedToday)}<span className="text-sm font-mono text-gray-500 ml-1">kcal</span></p>
+                    ) : (
+                        <div className="h-full flex flex-col justify-end">
+                            <p className="text-xl font-bebas text-gray-600 tracking-widest">No Data</p>
+                            <Link to="/routine" className="text-[10px] text-[#C8FF00] uppercase font-bold tracking-widest hover:underline mt-1 block">Log Workout</Link>
+                        </div>
+                    )}
                 </div>
+
+                {/* Weight */}
                 <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-2">Total Vol</p>
-                    <p className="text-4xl font-bebas text-white">12.4<span className="text-sm font-mono text-[#00E5FF] ml-1">t</span></p>
+                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3 block">Body Weight</p>
+                    {data?.currentWeight ? (
+                        <p className="text-5xl font-bebas text-white">{data.currentWeight}<span className="text-sm font-mono text-gray-500 ml-1">kg</span></p>
+                    ) : (
+                        <div className="h-full flex flex-col justify-end">
+                            <p className="text-xl font-bebas text-gray-600 tracking-widest">No Data</p>
+                            <Link to="/progress" className="text-[10px] text-white uppercase font-bold tracking-widest hover:underline mt-1 block">Log Weight</Link>
+                        </div>
+                    )}
                 </div>
+
+                {/* Body Fat */}
                 <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-2">Sessions</p>
-                    <p className="text-4xl font-bebas text-white">{workoutLog.length}</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3 block">Body Fat</p>
+                    {data?.currentBodyFat ? (
+                        <p className="text-5xl font-bebas text-[#00E5FF]">{data.currentBodyFat}<span className="text-lg font-mono text-[#00E5FF] ml-1">%</span></p>
+                    ) : (
+                        <div className="h-full flex flex-col justify-end">
+                            <p className="text-xl font-bebas text-gray-600 tracking-widest">No Data</p>
+                            <Link to="/progress" className="text-[10px] text-[#00E5FF] uppercase font-bold tracking-widest hover:underline mt-1 block">Calculate Now</Link>
+                        </div>
+                    )}
                 </div>
+
+                {/* PRs */}
                 <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-2">Next Rest</p>
-                    <p className="text-4xl font-bebas text-[#FF0055]">Sun</p>
+                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3 block">Active PRs</p>
+                    {data?.activePRs > 0 ? (
+                        <p className="text-5xl font-bebas text-[#FF0055]">{data.activePRs}<span className="text-sm text-[#FF0055] ml-2">👑</span></p>
+                    ) : (
+                        <div className="h-full flex flex-col justify-end">
+                            <p className="text-xl font-bebas text-gray-600 tracking-widest">No Data</p>
+                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1 block">Keep Pushing</p>
+                        </div>
+                    )}
                 </div>
+
             </div>
         </motion.div>
     );

@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom';
 import RestDay from '../components/RestDay';
 import { defaultSplits } from '../data/defaultSplits';
 
-function SortableExercise({ exercise, onToggle, onOpenVideo, isLocked }) {
+function SortableExercise({ exercise, onToggle, onOpenVideo, isLocked, suggestion }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: exercise.id });
     const style = { transform: CSS.Transform.toString(transform), transition };
     const isChecked = isLocked || exercise.completed;
@@ -42,6 +42,11 @@ function SortableExercise({ exercise, onToggle, onOpenVideo, isLocked }) {
             </div>
 
             <div className="flex-1 hidden sm:block ml-2">
+                {suggestion && !isChecked && (
+                    <div className="text-[10px] text-[#FF0055] font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
+                        🚀 {suggestion}
+                    </div>
+                )}
                 <h4 className={`text-2xl font-bebas tracking-widest uppercase transition-all ${isChecked ? 'line-through text-gray-600' : 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]'}`}>
                     {exercise.name}
                 </h4>
@@ -63,7 +68,12 @@ function SortableExercise({ exercise, onToggle, onOpenVideo, isLocked }) {
     );
 }
 
+import { defaultSplits } from '../data/defaultSplits';
+import CardioPromptModal from '../components/CardioPromptModal';
+import useAuthStore from '../store/authStore';
+
 export default function Routine() {
+    const { token } = useAuthStore();
     const { activeSplitId, splits, logWorkout, workoutLog } = useGymStore();
     const activeSplitRaw = splits.find(s => s.id === activeSplitId);
 
@@ -87,6 +97,10 @@ export default function Routine() {
     const [selectedVideo, setSelectedVideo] = useState(null);
     const [showConfetti, setShowConfetti] = useState(false);
     const [showLockModal, setShowLockModal] = useState(false);
+    const [showCardioPrompt, setShowCardioPrompt] = useState(false);
+    const [suggestions, setSuggestions] = useState({});
+    const [needsRest, setNeedsRest] = useState(false);
+    const [restSoftBypassed, setRestSoftBypassed] = useState(false);
 
     // Workout Lock Check
     const todayStr = new Date().toISOString().split('T')[0];
@@ -99,9 +113,32 @@ export default function Routine() {
             const day = activeSplit.days.find(d => d.id === scheduledDayId);
             if (day) {
                 setExercises(day.exercises.map(ex => ({ ...ex, completed: false })));
+
+                if (token && selectedDayIndex === todayIndex) {
+                    // Check rest advisory
+                    fetch('http://localhost:8080/api/workout/rest-advisory', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }).then(res => res.json()).then(data => {
+                        if (data.needsRest) setNeedsRest(true);
+                    }).catch(e => { });
+
+                    day.exercises.forEach(async (ex) => {
+                        try {
+                            const res = await fetch(`http://localhost:8080/api/workout/suggestion?exercise=${encodeURIComponent(ex.name)}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (res.ok) {
+                                const data = await res.json();
+                                if (data.suggestion) {
+                                    setSuggestions(prev => ({ ...prev, [ex.name]: data.suggestion }));
+                                }
+                            }
+                        } catch (e) { }
+                    });
+                }
             }
         }
-    }, [activeSplit, scheduledDayId, isRestDay]);
+    }, [activeSplit, scheduledDayId, isRestDay, token, selectedDayIndex, todayIndex]);
 
     const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
 
@@ -153,12 +190,32 @@ export default function Routine() {
         }
 
         const dayName = activeSplit.days.find(d => d.id === scheduledDayId)?.name || 'Workout';
+
+        const payload = {
+            splitId: activeSplit.id,
+            dayId: String(scheduledDayId),
+            dayName: dayName,
+            exercises: exercises.map(ex => ({
+                name: ex.name,
+                sets: parseInt(ex.sets),
+                reps: parseInt(ex.reps),
+                weight: parseFloat(ex.weight) || 0.0
+            }))
+        };
+
+        fetch('http://localhost:8080/api/workout/complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        }).catch(err => console.error(err));
+
         toast.success(`${dayName} Completed!`, { icon: '🔥', style: { borderRadius: '12px', background: '#00E5FF', color: '#000', fontWeight: 'bold' } });
         setExercises(items => items.map(ex => ({ ...ex, completed: true })));
         logWorkout(activeSplit.id, scheduledDayId);
 
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 3500);
+        setTimeout(() => setShowCardioPrompt(true), 2500);
     };
 
     const isAllComplete = exercises.length > 0 && exercises.every(ex => ex.completed);
@@ -191,6 +248,24 @@ export default function Routine() {
                             <h2 className="text-4xl font-bebas text-white tracking-widest mb-4">You've already crushed today's workout!</h2>
                             <p className="text-gray-400 mb-8 font-mono text-sm leading-relaxed">Come back tomorrow for <strong className="text-[#00E5FF] text-base">{nextDayName}</strong>.<br />Rest, recover, and grow.</p>
                             <button onClick={() => setShowLockModal(false)} className="w-full btn-3d-cyan text-black font-bebas text-2xl tracking-widest py-4 rounded-xl">Understood, Boss</button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Rest Day Soft Block Modal Overlay */}
+            <AnimatePresence>
+                {needsRest && !restSoftBypassed && !isLockedToday && selectedDayIndex === todayIndex && !isRestDay && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/90 backdrop-blur-xl" />
+                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 30 }} className="relative card-3d p-10 max-w-md w-full text-center border-[#FF0055]">
+                            <span className="text-[80px] mb-4 block drop-shadow-xl">🛌</span>
+                            <h2 className="text-4xl font-bebas text-white tracking-widest mb-4">Central Nervous System Fatigue Protocol!</h2>
+                            <p className="text-gray-400 mb-8 font-mono text-sm leading-relaxed">You have trained 5 or more days consecutively. Muscle is built during recovery, not in the gym.<br /><br />We strongly advise taking a Rest Day.</p>
+                            <div className="space-y-4">
+                                <Link to="/history" className="w-full btn-3d-cyan text-black font-bebas text-2xl tracking-widest py-4 rounded-xl flex items-center justify-center">Take a Rest Day</Link>
+                                <button onClick={() => setRestSoftBypassed(true)} className="w-full text-gray-500 font-bebas tracking-widest uppercase hover:text-white transition-colors">Bypass & Train Anyway (Not Recommended)</button>
+                            </div>
                         </motion.div>
                     </div>
                 )}
@@ -274,6 +349,7 @@ export default function Routine() {
                                                 onToggle={handleToggle}
                                                 onOpenVideo={() => setSelectedVideo(exercise.name)}
                                                 isLocked={isViewingTodaysCompletedLog || selectedDayIndex !== todayIndex}
+                                                suggestion={suggestions[exercise.name]}
                                             />
                                         </motion.div>
                                     ))}
@@ -290,6 +366,7 @@ export default function Routine() {
             )}
 
             <YoutubeModal exerciseName={selectedVideo} isOpen={!!selectedVideo} onClose={() => setSelectedVideo(null)} />
+            <CardioPromptModal isOpen={showCardioPrompt} onClose={() => setShowCardioPrompt(false)} />
         </motion.div>
     );
 }

@@ -6,31 +6,49 @@ const useAuthStore = create((set) => ({
     isAuthenticated: !!localStorage.getItem('token'),
 
     login: async (credentials) => {
-        // Frontend-only mock for Vercel
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const user = { username: credentials.username || 'Athlete' };
-                const token = 'mock-jwt-' + Date.now();
-                localStorage.setItem('token', token);
-                localStorage.setItem('gym_user', JSON.stringify(user));
-                set({ user, token, isAuthenticated: true });
-                resolve({ success: true });
-            }, 600);
-        });
+        try {
+            const response = await fetch('http://localhost:8080/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(credentials)
+            });
+            if (!response.ok) throw new Error('Invalid credentials');
+            const data = await response.json();
+
+            localStorage.setItem('token', data.token);
+            // Decode simple user from token or just stash name
+            const user = { username: credentials.username };
+            localStorage.setItem('gym_user', JSON.stringify(user));
+
+            set({ user, token: data.token, isAuthenticated: true });
+            return { success: true };
+        } catch (error) {
+            throw error;
+        }
     },
 
     register: async (userData) => {
-        // Frontend-only mock for Vercel
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const user = { username: userData.username || 'Athlete' };
-                const token = 'mock-jwt-' + Date.now();
-                localStorage.setItem('token', token);
-                localStorage.setItem('gym_user', JSON.stringify(user));
-                set({ user, token, isAuthenticated: true });
-                resolve({ success: true });
-            }, 600);
-        });
+        try {
+            const response = await fetch('http://localhost:8080/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || 'Registration failed');
+            }
+            const data = await response.json();
+
+            localStorage.setItem('token', data.token);
+            const user = { username: userData.username };
+            localStorage.setItem('gym_user', JSON.stringify(user));
+
+            set({ user, token: data.token, isAuthenticated: true });
+            return { success: true };
+        } catch (error) {
+            throw error;
+        }
     },
 
     logout: () => {
