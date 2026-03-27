@@ -23,6 +23,9 @@ const useAuthStore = create((set) => ({
             set({ user, token: data.token, isAuthenticated: true });
             return { success: true };
         } catch (error) {
+            if (error.message === 'Failed to fetch') {
+                throw new Error('Network Error: Cannot connect to backend. Ensure VITE_API_URL is configured in your Vercel deployment settings.');
+            }
             throw error;
         }
     },
@@ -47,6 +50,9 @@ const useAuthStore = create((set) => ({
             set({ user, token: data.token, isAuthenticated: true });
             return { success: true };
         } catch (error) {
+            if (error.message === 'Failed to fetch') {
+                throw new Error('Network Error: Cannot connect to backend. Ensure VITE_API_URL is configured in your Vercel deployment settings.');
+            }
             throw error;
         }
     },
