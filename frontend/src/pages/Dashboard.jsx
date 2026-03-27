@@ -125,10 +125,10 @@ export default function Dashboard() {
                     <h2 className="text-3xl font-bebas tracking-widest text-white mb-6">Daily Analysis</h2>
                     <div className="p-5 card-3d-item border-[#222]">
                         <p className="text-gray-300 font-mono text-sm leading-relaxed tracking-wide">
-                            {data?.aiInsight ? data.aiInsight : "You haven't logged any notes recently. Track your energy to generate insights."}
+                            {stats?.aiInsight ? stats.aiInsight : "You haven't logged any notes recently. Track your energy to generate insights."}
                         </p>
                     </div>
-                    {!data?.aiInsight && (
+                    {!stats?.aiInsight && (
                         <Link to="/notes" className="inline-block mt-4 text-[#FF0055] hover:text-white font-bebas text-xl tracking-widest uppercase transition-colors">
                             Log a Note ➔
                         </Link>
@@ -141,7 +141,7 @@ export default function Dashboard() {
                     <div className="flex flex-col h-full justify-between pb-8">
                         <div className="space-y-4">
                             <h3 className="text-4xl font-bebas uppercase text-[#00E5FF] tracking-widest drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]">
-                                {data?.todaysFocus || "Rest Day"}
+                                {stats?.todaysFocus || "Rest Day"}
                             </h3>
                             <p className="text-gray-400 font-mono text-sm">Next Session: Automatic</p>
                         </div>
@@ -161,8 +161,8 @@ export default function Dashboard() {
                 {/* Calories */}
                 <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
                     <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3 block">Energy Output</p>
-                    {data?.caloriesBurnedToday ? (
-                        <p className="text-5xl font-bebas text-[#C8FF00]">{Math.round(data.caloriesBurnedToday)}<span className="text-sm font-mono text-gray-500 ml-1">kcal</span></p>
+                    {stats?.caloriesBurnedToday ? (
+                        <p className="text-5xl font-bebas text-[#C8FF00]">{Math.round(stats.caloriesBurnedToday)}<span className="text-sm font-mono text-gray-500 ml-1">kcal</span></p>
                     ) : (
                         <div className="h-full flex flex-col justify-end">
                             <p className="text-xl font-bebas text-gray-600 tracking-widest">No Data</p>
@@ -174,8 +174,8 @@ export default function Dashboard() {
                 {/* Weight */}
                 <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
                     <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3 block">Body Weight</p>
-                    {data?.currentWeight ? (
-                        <p className="text-5xl font-bebas text-white">{data.currentWeight}<span className="text-sm font-mono text-gray-500 ml-1">kg</span></p>
+                    {stats?.currentWeight ? (
+                        <p className="text-5xl font-bebas text-white">{stats.currentWeight}<span className="text-sm font-mono text-gray-500 ml-1">kg</span></p>
                     ) : (
                         <div className="h-full flex flex-col justify-end">
                             <p className="text-xl font-bebas text-gray-600 tracking-widest">No Data</p>
@@ -187,8 +187,8 @@ export default function Dashboard() {
                 {/* Body Fat */}
                 <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
                     <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3 block">Body Fat</p>
-                    {data?.currentBodyFat ? (
-                        <p className="text-5xl font-bebas text-[#00E5FF]">{data.currentBodyFat}<span className="text-lg font-mono text-[#00E5FF] ml-1">%</span></p>
+                    {stats?.currentBodyFat ? (
+                        <p className="text-5xl font-bebas text-[#00E5FF]">{stats.currentBodyFat}<span className="text-lg font-mono text-[#00E5FF] ml-1">%</span></p>
                     ) : (
                         <div className="h-full flex flex-col justify-end">
                             <p className="text-xl font-bebas text-gray-600 tracking-widest">No Data</p>
@@ -200,8 +200,8 @@ export default function Dashboard() {
                 {/* PRs */}
                 <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
                     <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3 block">Active PRs</p>
-                    {data?.activePRs > 0 ? (
-                        <p className="text-5xl font-bebas text-[#FF0055]">{data.activePRs}<span className="text-sm text-[#FF0055] ml-2">👑</span></p>
+                    {stats?.activePRs > 0 ? (
+                        <p className="text-5xl font-bebas text-[#FF0055]">{stats.activePRs}<span className="text-sm text-[#FF0055] ml-2">👑</span></p>
                     ) : (
                         <div className="h-full flex flex-col justify-end">
                             <p className="text-xl font-bebas text-gray-600 tracking-widest">No Data</p>
