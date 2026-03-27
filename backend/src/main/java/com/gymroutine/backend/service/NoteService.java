@@ -22,8 +22,12 @@ public class NoteService {
             note.setDate(java.time.LocalDate.now());
         }
 
+        if (note.getEnergyLevel() == null) {
+            note.setEnergyLevel(3);
+        }
+
         // Mock AI Insight Generation
-        String text = note.getContent().toLowerCase();
+        String text = note.getContent() != null ? note.getContent().toLowerCase() : "";
         String generatedInsight = "Consistency is key. Great job logging your thoughts.";
 
         if (text.contains("tired") || text.contains("exhausted") || text.contains("fatigue")
