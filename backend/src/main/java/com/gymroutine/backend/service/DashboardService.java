@@ -57,4 +57,22 @@ public class DashboardService {
 
         return dto;
     }
+
+    public java.util.Map<String, Object> getWeeklySummary(User user) {
+        LocalDateTime startOfWeek = LocalDate.now().minusDays(LocalDate.now().getDayOfWeek().getValue() % 7)
+                .atStartOfDay();
+        long workoutsThisWeek = workoutLogRepo.findAllByUserAndCompletedAtAfterOrderByCompletedAtDesc(user, startOfWeek)
+                .size();
+        long newPRs = prRepo.findAllByUser(user).stream()
+                .filter(p -> p.getDateAchieved() != null && p.getDateAchieved().isAfter(startOfWeek))
+                .count();
+        double caloriesBurned = cardioRepo.findAllByUserAndDateLoggedAfter(user, startOfWeek).stream()
+                .filter(c -> c.getEstimatedCaloriesBurned() != null)
+                .mapToDouble(CardioLog::getEstimatedCaloriesBurned)
+                .sum();
+        return java.util.Map.of(
+                "workoutsThisWeek", workoutsThisWeek,
+                "newPRs", newPRs,
+                "caloriesBurned", caloriesBurned);
+    }
 }

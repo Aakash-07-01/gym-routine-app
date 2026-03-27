@@ -19,13 +19,13 @@ public class NutritionService {
 
     public NutritionLog saveLog(User user, NutritionLog log) {
         log.setUser(user);
-        if (log.getDateLogged() == null) {
-            log.setDateLogged(LocalDateTime.now());
+        if (log.getLogDate() == null) {
+            log.setLogDate(LocalDateTime.now());
         }
         return repo.save(log);
     }
 
     public List<NutritionLog> getTodaysLogs(User user) {
-        return repo.findAllByUserAndDateLoggedAfter(user, LocalDate.now().atStartOfDay());
+        return repo.findAllByUserAndLogDateAfter(user, LocalDate.now().atStartOfDay());
     }
 }

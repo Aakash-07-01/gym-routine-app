@@ -19,8 +19,8 @@ public class DashboardController {
     }
 
     @GetMapping("/summary")
-    public ResponseEntity<Map<String, Object>> getDashboardSummary(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(dashboardService.getDashboardSummary(user));
+    public ResponseEntity<DashboardDTO> getDashboardSummary(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(dashboardService.getDashboardData(user));
     }
 
     @GetMapping("/weekly")

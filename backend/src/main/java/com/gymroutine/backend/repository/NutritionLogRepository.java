@@ -10,5 +10,5 @@ import java.util.List;
 
 @Repository
 public interface NutritionLogRepository extends JpaRepository<NutritionLog, Long> {
-    List<NutritionLog> findAllByUserAndDateLoggedAfter(User user, LocalDateTime date);
+    List<NutritionLog> findAllByUserAndLogDateAfter(User user, LocalDateTime date);
 }

@@ -21,6 +21,8 @@ public class DailyNote {
     @Column(columnDefinition = "TEXT")
     private String aiInsight;
 
+    private Integer energyLevel = 3;
+
     public DailyNote() {
     }
 
@@ -62,5 +64,13 @@ public class DailyNote {
 
     public void setAiInsight(String aiInsight) {
         this.aiInsight = aiInsight;
+    }
+
+    public Integer getEnergyLevel() {
+        return energyLevel;
+    }
+
+    public void setEnergyLevel(Integer energyLevel) {
+        this.energyLevel = energyLevel;
     }
 }

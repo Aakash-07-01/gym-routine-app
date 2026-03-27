@@ -19,7 +19,7 @@ public class NoteService {
     public DailyNote saveNote(User user, DailyNote note) {
         note.setUser(user);
         if (note.getDate() == null) {
-            note.setDate(LocalDateTime.now());
+            note.setDate(java.time.LocalDate.now());
         }
 
         // Mock AI Insight Generation
