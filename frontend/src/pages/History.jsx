@@ -145,15 +145,9 @@ export default function History() {
                         <p className="text-gray-400">{dateStr}</p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-gym-surface p-4 rounded-xl border border-gym-border">
-                            <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Total Volume</p>
-                            <p className="text-2xl font-mono text-gym-primary">14,200 <span className="text-sm">kg</span></p>
-                        </div>
-                        <div className="bg-gym-surface p-4 rounded-xl border border-gym-border">
-                            <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Duration</p>
-                            <p className="text-2xl font-mono text-gym-primary">1h 12m</p>
-                        </div>
+                    <div className="bg-gym-surface p-4 rounded-xl border border-gym-border">
+                        <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Duration</p>
+                        <p className="text-2xl font-mono text-gym-primary">1h 12m</p>
                     </div>
 
                     <div className="bg-gym-surface rounded-xl border border-gym-border p-4">

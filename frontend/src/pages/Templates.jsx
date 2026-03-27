@@ -3,7 +3,7 @@ import useGymStore from '../store/gymStore';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, Copy, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Copy, Edit2, Trash2, X } from 'lucide-react';
 
 export default function Templates() {
     const { splits, setActiveSplitId, deleteCustomSplit } = useGymStore();
@@ -13,6 +13,40 @@ export default function Templates() {
 
     const defaultSplits = splits.filter(s => s.isDefault);
     const customSplits = splits.filter(s => !s.isDefault);
+
+    const analyzeSplit = (split) => {
+        const uniqueWorkoutDays = split.days.length;
+        const activeDaysPerWeek = split.schedule ? Object.values(split.schedule).filter(id => id !== 'rest').length : uniqueWorkoutDays;
+
+        let advantages = [];
+        let disadvantages = [];
+
+        if (activeDaysPerWeek >= 6) {
+            advantages = ["Maximized muscle protein synthesis freq.", "Highest weekly caloric expenditure"];
+            disadvantages = ["Requires elite recovery & sleep habits", "High risk of central nervous fatigue"];
+        } else if (activeDaysPerWeek === 5) {
+            advantages = ["High weekly volume capacity", "Great isolation for specific muscles"];
+            disadvantages = ["Leaves little room for missed days", "Requires strict nutrition compliance"];
+        } else if (activeDaysPerWeek === 4) {
+            advantages = ["Perfect balance of volume & recovery", "Flexible scheduling for busy lives"];
+            disadvantages = ["Workouts may be slightly longer", "Intensity must be kept very high"];
+        } else {
+            advantages = ["Maximum central nervous system recovery", "Highly sustainable long-term"];
+            disadvantages = ["Lower total weekly muscle stimulation", "Progress may be slower for advanced athletes"];
+        }
+
+        const name = split.name.toLowerCase();
+        if (name.includes('bro') || name.includes('body part')) {
+            advantages.push("Insane localized muscle pumps");
+            disadvantages.push("Muscles only hit 1x per week");
+        }
+        if (name.includes('full') || name.includes('5/3/1')) {
+            advantages.push("Rapid strength & compound development");
+            disadvantages.push("High systemic fatigue per session");
+        }
+
+        return { advantages: advantages.slice(0, 2), disadvantages: disadvantages.slice(0, 2) };
+    };
 
     const handleUseSplit = (templateId) => {
         setLoadingId(templateId);
@@ -33,6 +67,7 @@ export default function Templates() {
 
     const renderSplitCard = (split) => {
         const isFlipped = flippedId === split.id;
+        const analysis = analyzeSplit(split);
         return (
             <motion.div
                 variants={{ hidden: { opacity: 0, scale: 0.9 }, visible: { opacity: 1, scale: 1 } }}
@@ -66,18 +101,34 @@ export default function Templates() {
 
                     {/* Back */}
                     <div className="absolute inset-0 backface-hidden bg-gym-surfaceElevated border border-[#C8FF00] p-6 rounded-[2rem] shadow-[0_0_40px_rgba(200,255,0,0.15)] flex flex-col justify-between" style={{ transform: 'rotateY(180deg)' }}>
-                        <div className="relative z-10">
-                            <h3 className="text-2xl font-bebas tracking-wide text-[#C8FF00] mb-4 border-b border-[#C8FF00]/20 pb-2">Day Breakdown</h3>
-                            <div className="space-y-2 mb-4 max-h-[140px] overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="relative z-10 flex flex-col h-full">
+
+                            <div className="grid grid-cols-2 gap-3 mb-4 mt-2">
+                                <div>
+                                    <p className="text-[11px] text-[#00E5FF] font-bold uppercase tracking-widest mb-1.5 flex items-center gap-1"><Plus size={12} /> Pros</p>
+                                    <ul className="text-xs text-gray-300 space-y-1.5 leading-tight list-disc pl-3">
+                                        {analysis.advantages.map((adv, i) => <li key={i}>{adv}</li>)}
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p className="text-[11px] text-[#FF0055] font-bold uppercase tracking-widest mb-1.5 flex items-center gap-1"><X size={12} /> Cons</p>
+                                    <ul className="text-xs text-gray-300 space-y-1.5 leading-tight list-disc pl-3">
+                                        {analysis.disadvantages.map((dis, i) => <li key={i}>{dis}</li>)}
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <h3 className="text-sm font-bebas tracking-wide text-[#C8FF00] mb-2 border-b border-[#C8FF00]/20 pb-1 mt-1">Structure ({split.days.length} Days)</h3>
+                            <div className="space-y-1.5 overflow-y-auto pr-2 custom-scrollbar max-h-[70px]">
                                 {split.days.map((d, i) => (
-                                    <div key={d.id} className="text-sm pb-1 flex justify-between items-end border-b border-gym-border/50 border-dashed">
-                                        <span className="text-gray-200 font-medium">{d.name}</span>
-                                        <span className="text-gray-500 font-mono text-[10px] uppercase">{d.exercises.length} ex</span>
+                                    <div key={d.id} className="text-xs pb-1 flex justify-between items-end border-b border-gym-border/50 border-dashed">
+                                        <span className="text-gray-200 font-medium truncate pr-2">{d.name}</span>
+                                        <span className="text-gray-500 font-mono text-[10px] uppercase whitespace-nowrap">{d.exercises.length} ex</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
-                        <div className="flex flex-col gap-3 mt-auto relative z-20" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex flex-col gap-3 mt-auto pt-4 relative z-20" onClick={(e) => e.stopPropagation()}>
                             <button
                                 onClick={() => handleUseSplit(split.id)}
                                 disabled={loadingId === split.id}
