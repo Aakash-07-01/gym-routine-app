@@ -5,4 +5,4 @@ nixPkgs = ["jdk17", "maven"]
 cmds = ["cd backend && mvn clean package -DskipTests"]
 
 [start]
-cmd = "cd backend && java -Xmx200m -XX:+UseSerialGC -XX:MaxMetaspaceSize=128m -Xss512k -Dserver.port=$PORT -jar target/*.jar"
+cmd = "cd backend && java -jar target/*.jar"
