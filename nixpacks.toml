@@ -2,7 +2,7 @@
 nixPkgs = ["jdk17", "maven"]
 
 [phases.build]
-cmds = ["cd backend && mvn clean package -DskipTests"]
+cmds = ["cd backend && export MAVEN_OPTS=\"-Xmx256m\" && mvn clean package -DskipTests"]
 
 [start]
-cmd = "cd backend && java -jar target/*.jar"
+cmd = "cd backend && java -Xmx300m -jar target/*.jar"
