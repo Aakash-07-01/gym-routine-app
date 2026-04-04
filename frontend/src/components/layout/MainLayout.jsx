@@ -1,9 +1,10 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Home, Calendar, LayoutList, History, Settings, LogOut, Dumbbell } from 'lucide-react';
+import { Home, Calendar, LayoutList, History, Settings, LogOut, Dumbbell, Shield } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 
 export default function MainLayout() {
     const logout = useAuthStore(state => state.logout);
+    const user = useAuthStore(state => state.user);
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -18,6 +19,10 @@ export default function MainLayout() {
         { to: '/history', icon: History, label: 'History' },
         { to: '/settings', icon: Settings, label: 'Settings' },
     ];
+
+    if (user?.username === 'admin') {
+        navItems.push({ to: '/admin', icon: Shield, label: 'Admin' });
+    }
 
     return (
         <div className="min-h-screen bg-gym-dark flex flex-col md:flex-row">

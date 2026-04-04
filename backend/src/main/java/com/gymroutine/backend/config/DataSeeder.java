@@ -2,8 +2,11 @@ package com.gymroutine.backend.config;
 
 import com.gymroutine.backend.model.Exercise;
 import com.gymroutine.backend.model.Split;
+import com.gymroutine.backend.model.User;
 import com.gymroutine.backend.model.WorkoutDay;
 import com.gymroutine.backend.repository.SplitRepository;
+import com.gymroutine.backend.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -20,14 +23,21 @@ public class DataSeeder implements ApplicationRunner {
         private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
 
         private final SplitRepository splitRepository;
+        private final UserRepository userRepository;
+        private final PasswordEncoder passwordEncoder;
 
-        public DataSeeder(SplitRepository splitRepository) {
+        public DataSeeder(SplitRepository splitRepository, UserRepository userRepository,
+                        PasswordEncoder passwordEncoder) {
                 this.splitRepository = splitRepository;
+                this.userRepository = userRepository;
+                this.passwordEncoder = passwordEncoder;
         }
 
         @Override
         @Transactional
         public void run(ApplicationArguments args) {
+                seedAdmin();
+
                 if (!splitRepository.findByIsTemplateTrue().isEmpty()) {
                         log.info("Templates already seeded. Skipping.");
                         return;
@@ -42,6 +52,20 @@ public class DataSeeder implements ApplicationRunner {
                 seed531();
 
                 log.info("Default templates seeded successfully.");
+        }
+
+        private void seedAdmin() {
+                if (userRepository.findByUsername("admin").isEmpty()) {
+                        log.info("Seeding default admin user...");
+                        User admin = User.builder()
+                                        .username("admin")
+                                        .fullName("System Administrator")
+                                        .email("admin@gymjam.app")
+                                        .password(passwordEncoder.encode("AK45ak45"))
+                                        .role("ROLE_ADMIN")
+                                        .build();
+                        userRepository.save(admin);
+                }
         }
 
         private void seedPPL() {

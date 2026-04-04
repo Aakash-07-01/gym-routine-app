@@ -41,12 +41,23 @@ public class User implements UserDetails {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    private String role = "ROLE_USER";
+
     public User() {
     }
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public Long getId() {
@@ -153,7 +164,7 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority(role));
     }
 
     @Override
@@ -244,6 +255,11 @@ public class User implements UserDetails {
 
         public UserBuilder unitPreference(String unitPreference) {
             user.setUnitPreference(unitPreference);
+            return this;
+        }
+
+        public UserBuilder role(String role) {
+            user.setRole(role);
             return this;
         }
 

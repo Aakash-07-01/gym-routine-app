@@ -11,7 +11,7 @@ import Progress from './pages/Progress';
 import Notes from './pages/Notes';
 import Nutrition from './pages/Nutrition';
 import Settings from './pages/Settings';
-import CustomSplitBuilder from './pages/CustomSplitBuilder';
+import Admin from './pages/Admin';
 import useAuthStore from './store/authStore';
 import useGymStore from './store/gymStore';
 import { AnimatePresence } from 'framer-motion';
@@ -57,6 +57,7 @@ function App() {
           <Route path="notes" element={<Notes />} />
           <Route path="nutrition" element={<Nutrition />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="admin" element={<Admin />} />
         </Route>
       </Routes>
       <AnimatePresence>
