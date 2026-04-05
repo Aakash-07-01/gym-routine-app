@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 @Service
 public class WorkoutService {
@@ -37,9 +39,31 @@ public class WorkoutService {
                 session.setUser(user);
                 session.setWorkoutLog(wlog);
                 session.setExerciseName(stat.name);
-                session.setSetsCompleted(stat.sets);
-                session.setRepsPerSet(stat.reps);
-                session.setWeightUsed(stat.weight);
+
+                int setsToSave = stat.sets;
+                int repsToSave = stat.reps;
+                double weightToSave = stat.weight;
+
+                if (stat.setsList != null && !stat.setsList.isEmpty()) {
+                    setsToSave = stat.setsList.size();
+                    // Find the max weight and max reps for backwards compatibility
+                    for (WorkoutCompleteRequest.SetStat s : stat.setsList) {
+                        if (s.weight > weightToSave || (s.weight == weightToSave && s.reps > repsToSave)) {
+                            weightToSave = s.weight;
+                            repsToSave = s.reps;
+                        }
+                    }
+                    try {
+                        ObjectMapper mapper = new ObjectMapper();
+                        session.setSetsData(mapper.writeValueAsString(stat.setsList));
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                session.setSetsCompleted(setsToSave);
+                session.setRepsPerSet(repsToSave);
+                session.setWeightUsed(weightToSave);
                 session.setCompletedAt(LocalDateTime.now());
                 sessionRepo.save(session);
 
@@ -52,14 +76,14 @@ public class WorkoutService {
                     pr = new PR();
                     pr.setUser(user);
                     pr.setExerciseName(stat.name);
-                    pr.setMaxWeight(stat.weight);
-                    pr.setMaxRepsAtWeight(stat.reps);
+                    pr.setMaxWeight(weightToSave);
+                    pr.setMaxRepsAtWeight(repsToSave);
                     pr.setDateAchieved(LocalDateTime.now());
                     prRepo.save(pr);
-                } else if (stat.weight > pr.getMaxWeight()
-                        || (stat.weight == pr.getMaxWeight() && stat.reps > pr.getMaxRepsAtWeight())) {
-                    pr.setMaxWeight(stat.weight);
-                    pr.setMaxRepsAtWeight(stat.reps);
+                } else if (weightToSave > pr.getMaxWeight()
+                        || (weightToSave == pr.getMaxWeight() && repsToSave > pr.getMaxRepsAtWeight())) {
+                    pr.setMaxWeight(weightToSave);
+                    pr.setMaxRepsAtWeight(repsToSave);
                     pr.setDateAchieved(LocalDateTime.now());
                     prRepo.save(pr);
                 }
@@ -68,24 +92,51 @@ public class WorkoutService {
         return wlog;
     }
 
-    public String getSuggestion(User user, String exerciseName) {
+    public java.util.Map<String, Object> getSuggestion(User user, String exerciseName) {
         List<ExerciseSession> sessions = sessionRepo.findAllByUserAndExerciseNameOrderByCompletedAtDesc(user,
                 exerciseName);
-        if (sessions.size() >= 3) {
-            ExerciseSession s1 = sessions.get(0);
-            ExerciseSession s2 = sessions.get(1);
-            ExerciseSession s3 = sessions.get(2);
 
-            // Plateau Detection: Same weight and reps for 3 consecutive sessions
-            if (s1.getWeightUsed().equals(s2.getWeightUsed()) && s2.getWeightUsed().equals(s3.getWeightUsed()) &&
-                    s1.getRepsPerSet().equals(s2.getRepsPerSet()) && s2.getRepsPerSet().equals(s3.getRepsPerSet())) {
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("suggestion", null);
+        response.put("pastSets", null);
 
-                double bump = "lbs".equalsIgnoreCase(user.getUnitPreference()) ? 5.0 : 2.5;
-                return "Plateau Detected! Target Weight: " + (s1.getWeightUsed() + bump)
-                        + (user.getUnitPreference() != null && user.getUnitPreference().startsWith("I") ? "lbs" : "kg");
+        if (sessions.isEmpty()) {
+            return response;
+        }
+
+        ExerciseSession lastSession = sessions.get(0);
+
+        if (lastSession.getSetsData() != null) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                List<java.util.Map<String, Object>> pastSets = mapper.readValue(lastSession.getSetsData(),
+                        new com.fasterxml.jackson.core.type.TypeReference<List<java.util.Map<String, Object>>>() {
+                        });
+                response.put("pastSets", pastSets);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
-        return null;
+
+        String suggestion = null;
+        if (sessions.size() >= 2) {
+            ExerciseSession s1 = sessions.get(0);
+            ExerciseSession s2 = sessions.get(1);
+            if (s1.getWeightUsed() != null && s1.getWeightUsed().equals(s2.getWeightUsed()) &&
+                    s1.getRepsPerSet() != null && s1.getRepsPerSet().equals(s2.getRepsPerSet())) {
+                double bump = "lbs".equalsIgnoreCase(user.getUnitPreference()) ? 5.0 : 2.5;
+                String unit = (user.getUnitPreference() != null && user.getUnitPreference().startsWith("I")) ? "lbs"
+                        : "kg";
+                suggestion = "Target Bump: " + (s1.getWeightUsed() + bump) + unit;
+            } else if (s1.getWeightUsed() != null) {
+                suggestion = "Last Best: " + s1.getWeightUsed() + " for " + s1.getRepsPerSet() + " reps.";
+            }
+        } else if (lastSession.getWeightUsed() != null) {
+            suggestion = "Last Best: " + lastSession.getWeightUsed() + " for " + lastSession.getRepsPerSet() + " reps.";
+        }
+
+        response.put("suggestion", suggestion);
+        return response;
     }
 
     public boolean needsRest(User user) {

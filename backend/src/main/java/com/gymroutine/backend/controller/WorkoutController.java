@@ -26,10 +26,9 @@ public class WorkoutController {
     }
 
     @GetMapping("/suggestion")
-    public ResponseEntity<Map<String, String>> getSuggestion(@AuthenticationPrincipal User user,
+    public ResponseEntity<Map<String, Object>> getSuggestion(@AuthenticationPrincipal User user,
             @RequestParam String exercise) {
-        String suggestion = service.getSuggestion(user, exercise);
-        return ResponseEntity.ok(Map.of("suggestion", suggestion != null ? suggestion : ""));
+        return ResponseEntity.ok(service.getSuggestion(user, exercise));
     }
 
     @GetMapping("/rest-advisory")

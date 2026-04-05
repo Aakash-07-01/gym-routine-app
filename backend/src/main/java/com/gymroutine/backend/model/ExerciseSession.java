@@ -22,6 +22,9 @@ public class ExerciseSession {
     private Integer repsPerSet;
     private Double weightUsed;
 
+    @Column(columnDefinition = "TEXT")
+    private String setsData;
+
     private LocalDateTime completedAt;
 
     public ExerciseSession() {
@@ -81,6 +84,14 @@ public class ExerciseSession {
 
     public void setWeightUsed(Double weightUsed) {
         this.weightUsed = weightUsed;
+    }
+
+    public String getSetsData() {
+        return setsData;
+    }
+
+    public void setSetsData(String setsData) {
+        this.setsData = setsData;
     }
 
     public LocalDateTime getCompletedAt() {

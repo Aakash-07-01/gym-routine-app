@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../store/authStore';
 import toast from 'react-hot-toast';
+import MetricsPromptModal from '../components/MetricsPromptModal';
 
 export default function Dashboard() {
     const { user, token, logout } = useAuthStore();
@@ -14,6 +15,7 @@ export default function Dashboard() {
     // Weekly Report
     const [weeklyReport, setWeeklyReport] = useState(null);
     const [showWeeklyModal, setShowWeeklyModal] = useState(false);
+    const [showMetricsPrompt, setShowMetricsPrompt] = useState(false);
 
     useEffect(() => {
         if (!token) {
@@ -53,6 +55,11 @@ export default function Dashboard() {
             if (!res.ok) throw new Error('Failed to fetch dashboard metrics');
             const json = await res.json();
             setStats(json);
+
+            // Check for weekly scale check-in
+            if (json.daysSinceLastMetricLog === null || json.daysSinceLastMetricLog >= 7) {
+                setShowMetricsPrompt(true);
+            }
         } catch (err) {
             toast.error("Could not load backend metrics.");
         } finally {
@@ -105,6 +112,12 @@ export default function Dashboard() {
                     </div>
                 )}
             </AnimatePresence>
+
+            <MetricsPromptModal
+                isOpen={showMetricsPrompt}
+                onClose={() => setShowMetricsPrompt(false)}
+                onSuccess={() => fetchDashboardStats()}
+            />
 
             {/* Header */}
             <header className="mb-10">

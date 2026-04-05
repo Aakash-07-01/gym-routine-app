@@ -8,6 +8,7 @@ public class DashboardDTO {
     private Integer streak;
     private Integer activePRs;
     private String aiInsight;
+    private Long daysSinceLastMetricLog;
 
     public DashboardDTO() {
     }
@@ -66,5 +67,13 @@ public class DashboardDTO {
 
     public void setAiInsight(String aiInsight) {
         this.aiInsight = aiInsight;
+    }
+
+    public Long getDaysSinceLastMetricLog() {
+        return daysSinceLastMetricLog;
+    }
+
+    public void setDaysSinceLastMetricLog(Long daysSinceLastMetricLog) {
+        this.daysSinceLastMetricLog = daysSinceLastMetricLog;
     }
 }

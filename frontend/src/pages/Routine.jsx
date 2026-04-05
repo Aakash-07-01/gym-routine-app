@@ -17,55 +17,130 @@ import RestDay from '../components/RestDay';
 import { defaultSplits } from '../data/defaultSplits';
 import CardioPromptModal from '../components/CardioPromptModal';
 import useAuthStore from '../store/authStore';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
-function SortableExercise({ exercise, onToggle, onOpenVideo, isLocked, suggestion }) {
+function SortableExercise({ exercise, onToggleSet, onUpdateSet, onOpenVideo, isLocked, suggestion }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: exercise.id });
     const style = { transform: CSS.Transform.toString(transform), transition };
-    const isChecked = isLocked || exercise.completed;
+    const [expanded, setExpanded] = useState(false);
+
+    // Calculate if entirely finished
+    const setsFinishedCount = exercise.setLogs?.filter(s => s.completed).length || 0;
+    const isChecked = isLocked || (exercise.setLogs && setsFinishedCount === exercise.setLogs.length && exercise.setLogs.length > 0);
 
     return (
-        <div ref={setNodeRef} style={style} className={`glass-panel p-5 flex flex-col sm:flex-row sm:items-center gap-4 transition-all duration-300 ${isChecked ? 'border-gym-blue/40 opacity-80 bg-gym-blue/5' : 'glass-panel-hover'} ${isLocked ? 'cursor-not-allowed' : ''}`}>
-            <div className="flex items-center gap-4 w-full sm:w-auto">
-                <div {...attributes} {...listeners} className={`cursor-grab shrink-0 ${isLocked ? 'pointer-events-none opacity-0' : 'text-gray-500 hover:text-white'}`}>
-                    <GripVertical size={20} />
+        <div ref={setNodeRef} style={style} className={`glass-panel flex flex-col transition-all duration-300 ${isChecked ? 'border-gym-blue/40 bg-gym-blue/5' : 'glass-panel-hover'} ${isLocked ? 'cursor-not-allowed opacity-80' : ''}`}>
+
+            {/* Header Row */}
+            <div className="p-5 flex flex-col sm:flex-row sm:items-center gap-4 relative z-10 bg-gym-surface">
+                <div className="flex items-center gap-4 w-full sm:w-auto">
+                    <div {...attributes} {...listeners} className={`cursor-grab shrink-0 ${isLocked ? 'pointer-events-none opacity-0' : 'text-gray-500 hover:text-white'}`}>
+                        <GripVertical size={20} />
+                    </div>
+
+                    <div className="flex-1 sm:hidden">
+                        <h4 className={`text-base font-bold tracking-wide transition-all ${isChecked ? 'line-through text-gray-500' : 'text-white'}`}>
+                            {exercise.name}
+                        </h4>
+                    </div>
+                    <button onClick={onOpenVideo} className="text-gym-red hover:text-white p-2 sm:hidden shrink-0 ml-auto" title="Watch Tutorial">
+                        <PlayCircle size={28} />
+                    </button>
+                    <button onClick={() => setExpanded(!expanded)} className="text-gym-blue p-2 sm:hidden shrink-0">
+                        {expanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                    </button>
                 </div>
 
-                <button onClick={() => onToggle(exercise.id)} className={`transition-transform active:scale-95 shrink-0 ${isLocked ? 'cursor-not-allowed cursor-default' : 'text-gym-blue'}`}>
-                    {isChecked ? <CheckCircle size={28} className="text-gym-blue drop-shadow-[0_0_10px_rgba(0,122,255,0.6)]" /> : <Circle size={28} className="text-gray-400 hover:text-white" />}
-                </button>
-                <div className="flex-1 sm:hidden">
-                    <h4 className={`text-base font-bold tracking-wide transition-all ${isChecked ? 'line-through text-gray-500' : 'text-white'}`}>
+                <div className="flex-1 hidden sm:block ml-2 w-full">
+                    {suggestion && !isChecked && (
+                        <div className="text-[10px] text-gym-red font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
+                            🚀 {suggestion}
+                        </div>
+                    )}
+                    <h4 className={`text-xl font-bold tracking-wide transition-all ${isChecked ? 'text-gym-blue drop-shadow-sm' : 'text-white drop-shadow-sm'} truncate`}>
                         {exercise.name}
                     </h4>
+                    <p className="text-sm font-mono text-gray-400 mt-1 tracking-widest">
+                        {setsFinishedCount} / {exercise.setLogs?.length || exercise.sets} SETS COMPLETED
+                    </p>
                 </div>
-                <button onClick={onOpenVideo} className="text-gym-red hover:text-white p-2 sm:hidden shrink-0 ml-auto" title="Watch Tutorial">
-                    <PlayCircle size={28} />
-                </button>
+
+                <div className="sm:hidden pl-12 mt-1 flex justify-between items-center">
+                    <p className="text-xs font-mono text-gray-400 tracking-widest">
+                        {setsFinishedCount} / {exercise.setLogs?.length || exercise.sets} SETS
+                    </p>
+                </div>
+
+                <div className="hidden sm:flex items-center gap-3 shrink-0 ml-auto">
+                    <button onClick={onOpenVideo} className="text-gym-red hover:text-white hover:scale-110 transition-transform p-2 drop-shadow-[0_0_8px_rgba(255,59,48,0.3)]" title="Watch Tutorial">
+                        <PlayCircle size={32} />
+                    </button>
+                    <button onClick={() => setExpanded(!expanded)} className="text-gym-blue hover:text-white transition-colors p-2 bg-white/5 rounded-lg border border-white/10">
+                        {expanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                    </button>
+                </div>
             </div>
 
-            <div className="flex-1 hidden sm:block ml-2 w-full max-w-sm">
-                {suggestion && !isChecked && (
-                    <div className="text-[10px] text-gym-red font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
-                        🚀 {suggestion}
-                    </div>
+            {/* Expanded Sets Tracker Accordion */}
+            <AnimatePresence>
+                {(expanded || !isChecked) && exercise.setLogs && (
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden border-t border-white/5">
+                        <div className="p-4 sm:px-6 sm:py-5 space-y-3 bg-black/20">
+                            {/* Headers */}
+                            <div className="flex items-center gap-3 text-[10px] sm:text-xs font-mono text-gray-500 uppercase tracking-widest font-bold px-2 mb-1">
+                                <div className="w-8 text-center">Set</div>
+                                <div className="flex-1 text-center shrink">Weight</div>
+                                <div className="flex-1 text-center shrink">Reps</div>
+                                <div className="w-10 text-center">Done</div>
+                            </div>
+
+                            {/* Rows */}
+                            {exercise.setLogs.map((setLog, index) => (
+                                <div key={index} className={`flex items-center gap-3 p-2 rounded-xl transition-all ${setLog.completed ? 'bg-gym-blue/10 border border-gym-blue/20' : 'bg-white/5 border border-transparent'} ${isLocked ? 'pointer-events-none' : ''}`}>
+                                    <div className="w-8 text-center font-mono text-gray-400 font-bold text-sm">{index + 1}</div>
+
+                                    <div className="flex-1 flex justify-center">
+                                        <div className="relative w-full max-w-[100px]">
+                                            <input
+                                                type="number"
+                                                value={setLog.weight}
+                                                onChange={(e) => onUpdateSet(exercise.id, index, 'weight', e.target.value)}
+                                                className={`w-full bg-black/40 border border-white/10 rounded-lg py-2 sm:py-2.5 px-3 text-center text-white font-mono text-sm sm:text-base outline-none focus:border-gym-primary transition-all ${setLog.completed ? 'opacity-50' : ''}`}
+                                                placeholder={exercise.weight || '0'}
+                                                disabled={setLog.completed || isLocked}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="flex-1 flex justify-center">
+                                        <div className="relative w-full max-w-[100px]">
+                                            <input
+                                                type="number"
+                                                value={setLog.reps}
+                                                onChange={(e) => onUpdateSet(exercise.id, index, 'reps', e.target.value)}
+                                                className={`w-full bg-black/40 border border-white/10 rounded-lg py-2 sm:py-2.5 px-3 text-center text-white font-mono text-sm sm:text-base outline-none focus:border-gym-accent transition-all ${setLog.completed ? 'opacity-50' : ''}`}
+                                                placeholder={exercise.reps || '0'}
+                                                disabled={setLog.completed || isLocked}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="w-10 flex justify-center items-center">
+                                        <button
+                                            onClick={() => onToggleSet(exercise.id, index)}
+                                            className={`transition-transform active:scale-90 ${setLog.completed ? 'text-gym-blue' : 'text-gray-500 hover:text-white'}`}
+                                            disabled={isLocked}
+                                        >
+                                            {setLog.completed ? <CheckCircle size={28} className="drop-shadow-[0_0_10px_rgba(0,122,255,0.8)]" /> : <Circle size={28} />}
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
                 )}
-                <h4 className={`text-xl font-bold tracking-wide transition-all ${isChecked ? 'line-through text-gray-600' : 'text-white drop-shadow-sm'} truncate`}>
-                    {exercise.name}
-                </h4>
-                <p className="text-sm font-mono text-gym-accent font-bold mt-1 tracking-widest">
-                    {exercise.sets} SETS × {exercise.reps} REPS {exercise.weight ? `| ${exercise.weight}` : ''}
-                </p>
-            </div>
+            </AnimatePresence>
 
-            <div className="sm:hidden pl-12 mt-1">
-                <p className="text-sm font-mono text-gym-accent font-bold tracking-widest">
-                    {exercise.sets} SETS × {exercise.reps} REPS {exercise.weight ? `| ${exercise.weight}` : ''}
-                </p>
-            </div>
-
-            <button onClick={onOpenVideo} className="text-gym-red hover:text-white hover:scale-110 transition-transform p-3 hidden sm:block shrink-0 drop-shadow-[0_0_8px_rgba(255,59,48,0.3)] ml-auto" title="Watch Tutorial">
-                <PlayCircle size={32} />
-            </button>
         </div>
     );
 }
@@ -109,7 +184,15 @@ export default function Routine() {
         if (activeSplit && scheduledDayId && !isRestDay) {
             const day = activeSplit.days.find(d => d.id === scheduledDayId);
             if (day) {
-                setExercises(day.exercises.map(ex => ({ ...ex, completed: false })));
+                setExercises(day.exercises.map(ex => ({
+                    ...ex,
+                    completed: false,
+                    setLogs: Array.from({ length: ex.sets }).map(() => ({
+                        reps: ex.reps || '',
+                        weight: ex.weight || '',
+                        completed: false
+                    }))
+                })));
 
                 if (token && selectedDayIndex === todayIndex) {
                     fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/workout/rest-advisory`, {
@@ -127,6 +210,20 @@ export default function Routine() {
                                 const data = await res.json();
                                 if (data.suggestion) {
                                     setSuggestions(prev => ({ ...prev, [ex.name]: data.suggestion }));
+                                }
+                                if (data.pastSets && data.pastSets.length > 0) {
+                                    setExercises(items => items.map(item => {
+                                        if (item.id === ex.id) {
+                                            const newSetLogs = item.setLogs.map((s, idx) => {
+                                                if (data.pastSets[idx]) {
+                                                    return { ...s, reps: data.pastSets[idx].reps || s.reps, weight: data.pastSets[idx].weight || s.weight };
+                                                }
+                                                return s;
+                                            });
+                                            return { ...item, setLogs: newSetLogs };
+                                        }
+                                        return item;
+                                    }));
                                 }
                             }
                         } catch (e) { }
@@ -161,7 +258,7 @@ export default function Routine() {
         }
     };
 
-    const handleToggle = (id) => {
+    const handleToggleSet = (exerciseId, setIndex) => {
         if (isViewingTodaysCompletedLog) return;
         if (selectedDayIndex !== todayIndex) {
             toast('You can only track today\'s workout.', { icon: 'ℹ️', style: { borderRadius: '10px', background: '#111', color: '#007AFF', border: '1px solid #333' } });
@@ -171,7 +268,22 @@ export default function Routine() {
             setShowLockModal(true);
             return;
         }
-        setExercises(items => items.map(ex => ex.id === id ? { ...ex, completed: !ex.completed } : ex));
+
+        setExercises(items => items.map(ex => {
+            if (ex.id !== exerciseId) return ex;
+            const newLogs = [...ex.setLogs];
+            newLogs[setIndex].completed = !newLogs[setIndex].completed;
+            return { ...ex, setLogs: newLogs };
+        }));
+    };
+
+    const handleUpdateSet = (exerciseId, setIndex, field, value) => {
+        setExercises(items => items.map(ex => {
+            if (ex.id !== exerciseId) return ex;
+            const newLogs = [...ex.setLogs];
+            newLogs[setIndex][field] = value;
+            return { ...ex, setLogs: newLogs };
+        }));
     };
 
     const handleCompleteDay = () => {
@@ -191,12 +303,36 @@ export default function Routine() {
             splitId: activeSplit.id,
             dayId: String(scheduledDayId),
             dayName: dayName,
-            exercises: exercises.map(ex => ({
-                name: ex.name,
-                sets: parseInt(ex.sets),
-                reps: parseInt(ex.reps),
-                weight: parseFloat(ex.weight) || 0.0
-            }))
+            exercises: exercises.map(ex => {
+
+                // If they completed sets, take the max as the top-level stats for fallback backwards compatibility
+                let finalSets = ex.sets;
+                let finalReps = ex.reps;
+                let finalWeight = ex.weight || 0.0;
+
+                if (ex.setLogs && ex.setLogs.length > 0) {
+                    const completedLogs = ex.setLogs.filter(s => s.completed);
+                    if (completedLogs.length > 0) {
+                        const maxWeightSet = completedLogs.reduce((prev, current) =>
+                            (parseFloat(current.weight) || 0) > (parseFloat(prev.weight) || 0) ? current : prev
+                        );
+                        finalSets = completedLogs.length;
+                        finalReps = parseInt(maxWeightSet.reps) || 0;
+                        finalWeight = parseFloat(maxWeightSet.weight) || 0.0;
+                    }
+                }
+
+                return {
+                    name: ex.name,
+                    sets: finalSets,
+                    reps: finalReps,
+                    weight: finalWeight,
+                    setsList: ex.setLogs ? ex.setLogs.map((s, i) => ({
+                        reps: parseInt(s.reps) || 0,
+                        weight: parseFloat(s.weight) || 0.0
+                    })) : []
+                };
+            })
         };
 
         fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/workout/complete`, {
@@ -214,7 +350,7 @@ export default function Routine() {
         setTimeout(() => setShowCardioPrompt(true), 2500);
     };
 
-    const isAllComplete = exercises.length > 0 && exercises.every(ex => ex.completed);
+    const isAllComplete = exercises.length > 0 && exercises.every(ex => ex.setLogs && ex.setLogs.every(s => s.completed));
 
     const nextDayId = activeSchedule[(todayIndex + 1) % 7];
     const nextDayName = nextDayId === 'rest' ? 'Rest Day 💤' : (activeSplit.days.find(d => d.id === nextDayId)?.name || 'Next Workout');
@@ -356,7 +492,8 @@ export default function Routine() {
                                         <motion.div key={exercise.id} layout initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }}>
                                             <SortableExercise
                                                 exercise={exercise}
-                                                onToggle={handleToggle}
+                                                onToggleSet={handleToggleSet}
+                                                onUpdateSet={handleUpdateSet}
                                                 onOpenVideo={() => setSelectedVideo(exercise.name)}
                                                 isLocked={isViewingTodaysCompletedLog || selectedDayIndex !== todayIndex}
                                                 suggestion={suggestions[exercise.name]}

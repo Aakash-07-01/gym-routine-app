@@ -48,5 +48,11 @@ public class WorkoutCompleteRequest {
         public int sets;
         public int reps;
         public double weight;
+        public List<SetStat> setsList;
+    }
+
+    public static class SetStat {
+        public int reps;
+        public double weight;
     }
 }
