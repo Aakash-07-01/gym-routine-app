@@ -16,7 +16,7 @@ public class UserService {
 
     @Transactional
     public User updateProfile(String username, UpdateProfileRequest request) {
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (request.getFullName() != null && !request.getFullName().isBlank()) {
@@ -43,7 +43,7 @@ public class UserService {
 
     @Transactional
     public void deleteProfile(String username) {
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameIgnoreCase(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         userRepository.delete(user);
         userRepository.flush();

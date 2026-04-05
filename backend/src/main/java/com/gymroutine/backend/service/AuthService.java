@@ -30,10 +30,7 @@ public class AuthService {
         }
 
         public AuthResponse register(RegisterRequest request) {
-                String normalizedUsername = request.getUsername() != null ? request.getUsername().toLowerCase() : null;
-                request.setUsername(normalizedUsername);
-
-                if (repository.findByUsername(request.getUsername()).isPresent()) {
+                if (repository.findByUsernameIgnoreCase(request.getUsername()).isPresent()) {
                         throw new RuntimeException("Username already exists");
                 }
                 String otp = String.format("%06d", new java.util.Random().nextInt(1000000));
@@ -60,10 +57,7 @@ public class AuthService {
         }
 
         public AuthResponse authenticate(AuthRequest request) {
-                String normalizedUsername = request.getUsername() != null ? request.getUsername().toLowerCase() : null;
-                request.setUsername(normalizedUsername);
-
-                var user = repository.findByUsername(request.getUsername())
+                var user = repository.findByUsernameIgnoreCase(request.getUsername())
                                 .orElseThrow();
                 if (!user.isEmailVerified()) {
                         throw new org.springframework.security.authentication.BadCredentialsException(
