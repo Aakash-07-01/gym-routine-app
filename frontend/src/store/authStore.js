@@ -57,8 +57,13 @@ const useAuthStore = create((set) => ({
                 body: JSON.stringify(userData)
             });
             if (!response.ok) {
-                const text = await response.text();
-                throw new Error(text || 'Registration failed');
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch (e) {
+                    throw new Error('Invalid credentials');
+                }
+                throw new Error(errorData.message || 'Login failed');
             }
             const data = await response.json();
 

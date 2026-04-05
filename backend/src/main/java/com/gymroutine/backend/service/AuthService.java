@@ -58,7 +58,7 @@ public class AuthService {
 
         public AuthResponse authenticate(AuthRequest request) {
                 var user = repository.findByUsernameIgnoreCase(request.getUsername())
-                                .orElseThrow();
+                                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
                 if (!user.isEmailVerified()) {
                         throw new org.springframework.security.authentication.BadCredentialsException(
                                         "Email not verified. Please check your inbox.");

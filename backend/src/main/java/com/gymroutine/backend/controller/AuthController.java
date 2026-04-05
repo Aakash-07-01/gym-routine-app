@@ -41,4 +41,15 @@ public class AuthController {
                     .body(java.util.Map.of("message", "Invalid or expired OTP."));
         }
     }
+
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+    public ResponseEntity<java.util.Map<String, String>> handleBadCredentials(
+            org.springframework.security.authentication.BadCredentialsException ex) {
+        return ResponseEntity.status(401).body(java.util.Map.of("message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<java.util.Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        return ResponseEntity.status(400).body(java.util.Map.of("message", ex.getMessage()));
+    }
 }
