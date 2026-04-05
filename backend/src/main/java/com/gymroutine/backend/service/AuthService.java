@@ -18,19 +18,25 @@ public class AuthService {
         private final PasswordEncoder passwordEncoder;
         private final JwtService jwtService;
         private final AuthenticationManager authenticationManager;
+        private final EmailService emailService;
 
         public AuthService(UserRepository repository, PasswordEncoder passwordEncoder,
-                        JwtService jwtService, AuthenticationManager authenticationManager) {
+                        JwtService jwtService, AuthenticationManager authenticationManager, EmailService emailService) {
                 this.repository = repository;
                 this.passwordEncoder = passwordEncoder;
                 this.jwtService = jwtService;
                 this.authenticationManager = authenticationManager;
+                this.emailService = emailService;
         }
 
         public AuthResponse register(RegisterRequest request) {
+                String normalizedUsername = request.getUsername() != null ? request.getUsername().toLowerCase() : null;
+                request.setUsername(normalizedUsername);
+
                 if (repository.findByUsername(request.getUsername()).isPresent()) {
                         throw new RuntimeException("Username already exists");
                 }
+                String otp = String.format("%06d", new java.util.Random().nextInt(1000000));
                 var user = User.builder()
                                 .fullName(request.getFullName())
                                 .username(request.getUsername())
@@ -44,23 +50,48 @@ public class AuthService {
                                 .experienceLevel(request.getExperienceLevel())
                                 .unitPreference(request.getUnitPreference())
                                 .build();
+                user.setOtpCode(otp);
+                user.setOtpExpiry(java.time.LocalDateTime.now().plusMinutes(10));
                 repository.save(user);
+                emailService.sendVerificationEmail(user.getEmail(), otp);
+                return AuthResponse.builder()
+                                .message("Please check your email to verify your account.")
+                                .build();
+        }
+
+        public AuthResponse authenticate(AuthRequest request) {
+                String normalizedUsername = request.getUsername() != null ? request.getUsername().toLowerCase() : null;
+                request.setUsername(normalizedUsername);
+
+                var user = repository.findByUsername(request.getUsername())
+                                .orElseThrow();
+                if (!user.isEmailVerified()) {
+                        throw new org.springframework.security.authentication.BadCredentialsException(
+                                        "Email not verified. Please check your inbox.");
+                }
+                authenticationManager.authenticate(
+                                new UsernamePasswordAuthenticationToken(
+                                                request.getUsername(),
+                                                request.getPassword()));
                 var jwtToken = jwtService.generateToken(user);
                 return AuthResponse.builder()
                                 .token(jwtToken)
                                 .build();
         }
 
-        public AuthResponse authenticate(AuthRequest request) {
-                authenticationManager.authenticate(
-                                new UsernamePasswordAuthenticationToken(
-                                                request.getUsername(),
-                                                request.getPassword()));
-                var user = repository.findByUsername(request.getUsername())
-                                .orElseThrow();
-                var jwtToken = jwtService.generateToken(user);
-                return AuthResponse.builder()
-                                .token(jwtToken)
-                                .build();
+        public boolean verifyOtp(String email, String otp) {
+                var user = repository.findAll().stream().filter(u -> email.equalsIgnoreCase(u.getEmail())).findFirst()
+                                .orElse(null);
+                if (user != null && otp.equals(user.getOtpCode())) {
+                        if (user.getOtpExpiry() != null
+                                        && java.time.LocalDateTime.now().isBefore(user.getOtpExpiry())) {
+                                user.setEmailVerified(true);
+                                user.setOtpCode(null);
+                                user.setOtpExpiry(null);
+                                repository.save(user);
+                                return true;
+                        }
+                }
+                return false;
         }
 }

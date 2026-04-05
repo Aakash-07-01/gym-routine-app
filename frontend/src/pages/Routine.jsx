@@ -146,9 +146,11 @@ function SortableExercise({ exercise, onToggleSet, onUpdateSet, onOpenVideo, isL
 }
 
 export default function Routine() {
-    const { token } = useAuthStore();
+    const { token, user: currentUser } = useAuthStore();
     const { activeSplitId, splits, logWorkout, workoutLog } = useGymStore();
-    const activeSplitRaw = splits.find(s => s.id === activeSplitId);
+
+    const validSplits = splits.filter(s => s.isDefault || !s._username || s._username === currentUser?.username);
+    const activeSplitRaw = validSplits.find(s => s.id === activeSplitId);
 
     // Default to a fallback if split is missing, standardizing logic.
     const activeSplit = activeSplitRaw?.isDefault ? (defaultSplits.find(s => s.id === activeSplitRaw.id) || activeSplitRaw) : activeSplitRaw;
@@ -175,8 +177,9 @@ export default function Routine() {
     const [restSoftBypassed, setRestSoftBypassed] = useState(false);
 
     // Workout Lock Check
+    const filteredWorkoutLog = workoutLog.filter(l => !l._username || l._username === currentUser?.username);
     const todayStr = new Date().toISOString().split('T')[0];
-    const todayLog = workoutLog.find(l => l.date === todayStr);
+    const todayLog = filteredWorkoutLog.find(l => l.date === todayStr);
     const isLockedToday = !!todayLog;
     const isViewingTodaysCompletedLog = isLockedToday && (selectedDayIndex === todayIndex);
 

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { defaultSplits } from '../data/defaultSplits';
+import useAuthStore from './authStore';
 
 const getCurrentWeekStart = () => {
     const now = new Date();
@@ -19,7 +20,6 @@ const useGymStore = create(
             workoutLog: [],
             youtubeCache: {},
             settings: {
-                youtubeApiKey: "AIzaSyBacvQR1h-SMjeXFxRGQjzqCcgdHlihtro",
                 theme: "dark"
             },
             currentWeekStart: null,
@@ -30,9 +30,10 @@ const useGymStore = create(
             // --- Split Actions ---
             setActiveSplitId: (id) => set({ activeSplitId: id }),
 
-            createCustomSplit: (split) => set((state) => ({
-                splits: [...state.splits, split]
-            })),
+            createCustomSplit: (split) => set((state) => {
+                const user = useAuthStore.getState().user;
+                return { splits: [...state.splits, { ...split, _username: user?.username }] };
+            }),
 
             updateCustomSplit: (updatedSplit) => set((state) => ({
                 splits: state.splits.map(s => s.id === updatedSplit.id ? updatedSplit : s)
@@ -48,11 +49,13 @@ const useGymStore = create(
 
             // --- Workout Actions ---
             logWorkout: (splitId, dayId) => set((state) => {
+                const user = useAuthStore.getState().user;
                 const todayStr = new Date().toISOString().split('T')[0];
                 const newLog = {
                     date: todayStr,
                     splitId,
                     dayId,
+                    _username: user?.username,
                     completedAt: new Date().toISOString()
                 };
                 return { workoutLog: [...state.workoutLog, newLog] };
@@ -102,7 +105,6 @@ const useGymStore = create(
                 workoutLog: [],
                 youtubeCache: {},
                 settings: {
-                    youtubeApiKey: "AIzaSyBacvQR1h-SMjeXFxRGQjzqCcgdHlihtro",
                     theme: "dark"
                 }
             })

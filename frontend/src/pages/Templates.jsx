@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import useGymStore from '../store/gymStore';
+import useAuthStore from '../store/authStore';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -11,8 +12,11 @@ export default function Templates() {
     const [loadingId, setLoadingId] = useState(null);
     const [flippedId, setFlippedId] = useState(null);
 
-    const defaultSplits = splits.filter(s => s.isDefault);
-    const customSplits = splits.filter(s => !s.isDefault);
+    const currentUser = useAuthStore(state => state.user);
+    const validSplits = splits.filter(s => s.isDefault || !s._username || s._username === currentUser?.username);
+
+    const defaultSplits = validSplits.filter(s => s.isDefault);
+    const customSplits = validSplits.filter(s => !s.isDefault);
 
     const analyzeSplit = (split) => {
         const uniqueWorkoutDays = split.days.length;

@@ -23,8 +23,16 @@ const useAuthStore = create((set) => ({
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(credentials)
             });
-            if (!response.ok) throw new Error('Invalid credentials');
-            const data = await response.json();
+            let data;
+            try {
+                data = await response.json();
+            } catch (e) {
+                // Ignore parse error
+            }
+
+            if (!response.ok) {
+                throw new Error(data?.message || 'Invalid credentials');
+            }
 
             localStorage.setItem('token', data.token);
             // Decode simple user from token or just stash name
@@ -54,12 +62,8 @@ const useAuthStore = create((set) => ({
             }
             const data = await response.json();
 
-            localStorage.setItem('token', data.token);
-            const user = { username: userData.username };
-            localStorage.setItem('gym_user', JSON.stringify(user));
-
-            set({ user, token: data.token, isAuthenticated: true });
-            return { success: true };
+            // For email verification, do NOT log the user in automatically
+            return { success: true, message: data.message || "Registration successful." };
         } catch (error) {
             if (error.message === 'Failed to fetch') {
                 throw new Error('Network Error: Cannot connect to backend. Ensure VITE_API_URL is configured in your Vercel deployment settings.');

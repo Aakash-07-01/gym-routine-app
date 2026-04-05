@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, X, Scale, Camera } from 'lucide-react';
 import useGymStore from '../store/gymStore';
+import useAuthStore from '../store/authStore';
 
 export default function History() {
     const { workoutLog, activeSplitId, splits, logWorkout } = useGymStore();
@@ -13,7 +14,11 @@ export default function History() {
     });
     const [selectedDateObj, setSelectedDateObj] = useState(null);
 
-    const activeSplit = splits.find(s => s.id === activeSplitId);
+    const currentUser = useAuthStore(state => state.user);
+    const validSplits = splits.filter(s => s.isDefault || !s._username || s._username === currentUser?.username);
+    const filteredWorkoutLog = workoutLog.filter(l => !l._username || l._username === currentUser?.username);
+
+    const activeSplit = validSplits.find(s => s.id === activeSplitId);
 
     const prevMonth = () => {
         const d = new Date(currentMonth);
@@ -69,7 +74,7 @@ export default function History() {
         const isToday = dateStr === todayStr;
         const isFuture = d > new Date(new Date().setHours(23, 59, 59, 999));
 
-        const logs = workoutLog.filter(l => l.date === dateStr);
+        const logs = filteredWorkoutLog.filter(l => l.date === dateStr);
         const isCompleted = logs.length > 0;
         const log = logs[0];
 
@@ -121,9 +126,12 @@ export default function History() {
         if (!selectedDateObj) return;
         const dateStr = selectedDateObj.date.toISOString().split('T')[0];
         // add mock rest to log to turn it blue instead of missed
-        useGymStore.setState(state => ({
-            workoutLog: [...state.workoutLog, { date: dateStr, splitId: activeSplit?.id, dayId: 'rest', completedAt: new Date().toISOString() }]
-        }));
+        useGymStore.setState(state => {
+            const user = useAuthStore.getState().user;
+            return {
+                workoutLog: [...state.workoutLog, { date: dateStr, splitId: activeSplit?.id, dayId: 'rest', _username: user?.username, completedAt: new Date().toISOString() }]
+            };
+        });
         setSelectedDateObj(null);
     };
 
@@ -134,7 +142,7 @@ export default function History() {
         const scheduledDayId = activeSplit?.schedule?.[d.getDay()];
         const scheduledDay = activeSplit?.days?.find(day => day.id === scheduledDayId);
         const dateStr = d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
-        const log = workoutLog.find(l => l.date === d.toISOString().split('T')[0]);
+        const log = filteredWorkoutLog.find(l => l.date === d.toISOString().split('T')[0]);
 
         if (status === 'past-completed' || status === 'today-completed') {
             const completedDayName = activeSplit?.days?.find(day => day.id === log?.dayId)?.name || 'Workout';

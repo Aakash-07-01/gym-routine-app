@@ -46,7 +46,7 @@ export default function MainLayout() {
                     </div>
                     <div className="flex items-center gap-3 text-white font-bold tracking-tight">
                         <Dumbbell size={20} className="text-gym-blue" />
-                        <span className="text-lg">FitOS</span>
+                        <span className="text-lg">{user?.fullName || user?.username ? `${user?.fullName || user?.username}'s Personal Trainer` : 'FitOS'}</span>
                     </div>
                 </div>
 
