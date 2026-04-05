@@ -12,6 +12,7 @@ import Notes from './pages/Notes';
 import Nutrition from './pages/Nutrition';
 import Settings from './pages/Settings';
 import Admin from './pages/Admin';
+import CustomSplitBuilder from './pages/CustomSplitBuilder';
 import useAuthStore from './store/authStore';
 import useGymStore from './store/gymStore';
 import { AnimatePresence } from 'framer-motion';
@@ -20,21 +21,13 @@ import { useEffect } from 'react';
 
 function App() {
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-  const { _hasHydrated, checkNewWeek, showNewWeekSummary } = useGymStore();
+  const { checkNewWeek, showNewWeekSummary } = useGymStore();
 
   useEffect(() => {
-    if (_hasHydrated && isAuthenticated) {
+    if (isAuthenticated) {
       checkNewWeek();
     }
-  }, [_hasHydrated, isAuthenticated, checkNewWeek]);
-
-  if (!_hasHydrated) {
-    return (
-      <div className="min-h-screen bg-gym-dark flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-gym-blue"></div>
-      </div>
-    );
-  }
+  }, [isAuthenticated, checkNewWeek]);
 
   return (
     <Router>

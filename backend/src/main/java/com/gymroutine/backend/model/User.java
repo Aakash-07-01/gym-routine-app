@@ -41,7 +41,7 @@ public class User implements UserDetails {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'ROLE_USER'")
     private String role = "ROLE_USER";
 
     public User() {

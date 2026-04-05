@@ -63,148 +63,148 @@ export default function Dashboard() {
     if (loading) {
         return (
             <div className="flex justify-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-[#00E5FF]"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-gym-blue"></div>
             </div>
         );
     }
 
     return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pb-24">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="pb-12">
 
             {/* Weekly Summary Modal */}
             <AnimatePresence>
                 {showWeeklyModal && weeklyReport && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setShowWeeklyModal(false)} />
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-[#000]/60 backdrop-blur-xl" onClick={() => setShowWeeklyModal(false)} />
                         <motion.div
-                            initial={{ scale: 0.8, opacity: 0, rotateX: 20 }}
-                            animate={{ scale: 1, opacity: 1, rotateX: 0 }}
-                            exit={{ scale: 0.8, opacity: 0, rotateX: -20 }}
-                            className="relative bg-[#111] p-10 max-w-lg w-full text-center border-t-4 border-t-[#C8FF00] border-l-4 border-l-[#C8FF00] shadow-[10px_10px_0_0_#C8FF00] rounded-xl"
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            className="relative glass-panel p-10 max-w-lg w-full text-center border border-white/20 shadow-[0_0_50px_rgba(0,122,255,0.2)]"
                         >
-                            <h2 className="text-6xl font-bebas text-white uppercase tracking-widest leading-none drop-shadow-md">Sunday Recap</h2>
-                            <p className="text-gray-400 font-mono text-sm tracking-widest uppercase mt-4 mb-8">Performance initialized and verified.</p>
+                            <h2 className="text-4xl font-bold text-white tracking-tight mb-2">Weekly Review</h2>
+                            <p className="text-gray-400 font-mono text-xs uppercase mb-8">Performance initialized and verified.</p>
 
                             <div className="grid grid-cols-2 gap-4 mb-8">
-                                <div className="bg-[#1a1a1a] p-6 border-b-2 border-[#C8FF00]">
-                                    <p className="text-5xl font-bebas text-[#C8FF00]">{weeklyReport.workoutsCompleted}</p>
+                                <div className="bg-white/5 rounded-xl p-6 border border-white/5 transition-colors hover:border-gym-blue/50">
+                                    <p className="text-5xl font-bold text-gym-blue">{weeklyReport.workoutsCompleted}</p>
                                     <p className="text-xs font-mono text-gray-400 mt-2 uppercase">Workouts</p>
                                 </div>
-                                <div className="bg-[#1a1a1a] p-6 border-b-2 border-[#00E5FF]">
-                                    <p className="text-5xl font-bebas text-[#00E5FF]">{weeklyReport.prsHit}</p>
+                                <div className="bg-white/5 rounded-xl p-6 border border-white/5 transition-colors hover:border-gym-accent/50">
+                                    <p className="text-5xl font-bold text-gym-accent">{weeklyReport.prsHit}</p>
                                     <p className="text-xs font-mono text-gray-400 mt-2 uppercase">New PRs</p>
                                 </div>
-                                <div className="bg-[#1a1a1a] p-6 border-b-2 border-[#FF0055] col-span-2">
-                                    <p className="text-5xl font-bebas text-[#FF0055]">{Math.round(weeklyReport.caloriesBurned)}<span className="text-xl">kcal</span></p>
-                                    <p className="text-xs font-mono text-gray-400 mt-2 uppercase">Cardio Calories Banished</p>
+                                <div className="bg-white/5 rounded-xl p-6 border border-white/5 transition-colors hover:border-gym-red/50 col-span-2">
+                                    <p className="text-5xl font-bold text-gym-red">{Math.round(weeklyReport.caloriesBurned)}<span className="text-xl ml-1">kcal</span></p>
+                                    <p className="text-xs font-mono text-gray-400 mt-2 uppercase">Cardio Output</p>
                                 </div>
                             </div>
 
-                            <button onClick={() => setShowWeeklyModal(false)} className="w-full btn-3d-cyan text-black font-bebas text-3xl tracking-widest py-4 uppercase">Continue Training</button>
+                            <button onClick={() => setShowWeeklyModal(false)} className="w-full glass-button font-bold text-lg py-4 uppercase tracking-wide">Continue Training</button>
                         </motion.div>
                     </div>
                 )}
             </AnimatePresence>
 
             {/* Header */}
-            <header className="flex justify-between items-end mb-4 border-b-2 border-[#222] pb-6">
-                <div>
-                    <h1 className="text-5xl font-bebas text-white tracking-widest uppercase drop-shadow-md">
-                        Welcome back, <span className="text-[#00E5FF]">{user?.fullName || user?.username || 'Athlete'}</span>
-                    </h1>
-                    <p className="text-gray-400 mt-2 font-mono tracking-widest text-sm uppercase">Engine Calibrated. Ready for Session.</p>
-                </div>
+            <header className="mb-10">
+                <h1 className="text-4xl font-bold text-white tracking-tight">
+                    Welcome back, <span className="text-gym-blue neon-glow">{user?.fullName || user?.username || 'Athlete'}</span>
+                </h1>
+                <p className="text-gray-400 mt-2 font-mono text-sm">System ready. Session initialized.</p>
             </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 {/* Motivation / AI Insight Card */}
-                <div className="card-3d p-8 relative overflow-hidden bg-[#111] border-l-[#FF0055]/50 border-t-[#FF0055]/50 group">
-                    <div className="absolute top-0 right-0 bg-[#FF0055] text-white font-bebas tracking-widest text-sm px-4 py-1 rounded-bl-xl shadow-[0_0_15px_rgba(255,0,85,0.6)]">
+                <div className="glass-panel p-8 relative overflow-hidden group hover:border-gym-blue/30 transition-colors">
+                    <div className="absolute top-0 right-0 bg-gym-blue/20 text-gym-blue text-xs font-mono px-3 py-1 rounded-bl-lg border-b border-l border-gym-blue/30 shadow-sm">
                         AI INSIGHT
                     </div>
-                    <h2 className="text-3xl font-bebas tracking-widest text-white mb-6">Daily Analysis</h2>
-                    <div className="p-5 card-3d-item border-[#222]">
-                        <p className="text-gray-300 font-mono text-sm leading-relaxed tracking-wide">
+                    <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">Daily Analysis</h2>
+                    <div className="p-4 bg-white/5 rounded-lg border border-white/5 group-hover:border-white/10 transition-colors min-h-[100px]">
+                        <p className="text-gray-300 font-mono text-sm leading-relaxed">
                             {stats?.aiInsight ? stats.aiInsight : "You haven't logged any notes recently. Track your energy to generate insights."}
                         </p>
                     </div>
                     {!stats?.aiInsight && (
-                        <Link to="/notes" className="inline-block mt-4 text-[#FF0055] hover:text-white font-bebas text-xl tracking-widest uppercase transition-colors">
-                            Log a Note ➔
+                        <Link to="/notes" className="inline-flex items-center gap-2 mt-4 text-gym-blue hover:text-white font-semibold text-sm tracking-wide transition-colors">
+                            Log a Note <span className="text-lg">→</span>
                         </Link>
                     )}
                 </div>
 
                 {/* Today's Workout Focus */}
-                <div className="card-3d p-8 relative overflow-hidden bg-[#111] border-l-[#00E5FF]/50 border-t-[#00E5FF]/50 group">
-                    <h2 className="text-3xl font-bebas tracking-widest text-white mb-6">Current Focus</h2>
-                    <div className="flex flex-col h-full justify-between pb-8">
-                        <div className="space-y-4">
-                            <h3 className="text-4xl font-bebas uppercase text-[#00E5FF] tracking-widest drop-shadow-[0_0_8px_rgba(0,229,255,0.4)]">
-                                {stats?.todaysFocus || "Rest Day"}
-                            </h3>
-                            <p className="text-gray-400 font-mono text-sm">Next Session: Automatic</p>
-                        </div>
-                        <div className="mt-8">
-                            <Link to="/routine" className="block w-full text-center btn-3d-cyan text-black font-bebas text-2xl tracking-widest py-4 rounded-xl uppercase">
-                                ENTER WORKOUT
-                            </Link>
-                        </div>
+                <div className="glass-panel p-8 relative flex flex-col justify-between group hover:border-gym-accent/30 transition-colors">
+                    <h2 className="text-xl font-bold text-white mb-2">Current Focus</h2>
+                    <div className="flex-1 flex flex-col justify-center my-4">
+                        <h3 className="text-4xl sm:text-5xl font-extrabold text-white tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                            {stats?.todaysFocus || "Rest Day"}
+                        </h3>
+                        <p className="text-gym-accent font-mono text-sm mt-2">Next Session: Automatic</p>
+                    </div>
+                    <div className="mt-4">
+                        <Link to="/routine" className="block w-full text-center glass-button font-bold text-lg py-3 rounded-lg uppercase tracking-wide">
+                            Enter Workout
+                        </Link>
                     </div>
                 </div>
             </div>
 
             {/* Core Metrics Grid */}
-            <h2 className="text-4xl font-bebas text-white tracking-widest mt-12 mb-6 uppercase border-b-2 border-[#222] pb-4">Biometrics & Output</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="flex items-center gap-4 mb-6 mt-12">
+                <div className="h-px bg-white/10 flex-1"></div>
+                <h2 className="text-sm font-mono text-gray-400 uppercase tracking-widest px-2">Biometrics & Output</h2>
+                <div className="h-px bg-white/10 flex-1"></div>
+            </div>
 
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
                 {/* Calories */}
-                <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3 block">Energy Output</p>
+                <div className="glass-panel p-5 sm:p-6 rounded-2xl flex flex-col justify-between group glass-panel-hover">
+                    <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest font-mono mb-2">Energy Output</p>
                     {stats?.caloriesBurnedToday ? (
-                        <p className="text-5xl font-bebas text-[#C8FF00]">{Math.round(stats.caloriesBurnedToday)}<span className="text-sm font-mono text-gray-500 ml-1">kcal</span></p>
+                        <p className="text-3xl sm:text-4xl font-bold text-white">{Math.round(stats.caloriesBurnedToday)}<span className="text-sm font-mono text-gray-500 ml-1">kcal</span></p>
                     ) : (
-                        <div className="h-full flex flex-col justify-end">
-                            <p className="text-xl font-bebas text-gray-600 tracking-widest">No Data</p>
-                            <Link to="/routine" className="text-[10px] text-[#C8FF00] uppercase font-bold tracking-widest hover:underline mt-1 block">Log Workout</Link>
+                        <div>
+                            <p className="text-lg sm:text-xl font-bold text-gray-600">--</p>
+                            <Link to="/routine" className="text-[10px] text-gym-accent uppercase font-bold tracking-widest hover:underline mt-1 block">Log Workout</Link>
                         </div>
                     )}
                 </div>
 
                 {/* Weight */}
-                <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3 block">Body Weight</p>
+                <div className="glass-panel p-5 sm:p-6 rounded-2xl flex flex-col justify-between group glass-panel-hover">
+                    <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest font-mono mb-2">Body Weight</p>
                     {stats?.currentWeight ? (
-                        <p className="text-5xl font-bebas text-white">{stats.currentWeight}<span className="text-sm font-mono text-gray-500 ml-1">kg</span></p>
+                        <p className="text-3xl sm:text-4xl font-bold text-white">{stats.currentWeight}<span className="text-sm font-mono text-gray-500 ml-1">kg</span></p>
                     ) : (
-                        <div className="h-full flex flex-col justify-end">
-                            <p className="text-xl font-bebas text-gray-600 tracking-widest">No Data</p>
+                        <div>
+                            <p className="text-lg sm:text-xl font-bold text-gray-600">--</p>
                             <Link to="/progress" className="text-[10px] text-white uppercase font-bold tracking-widest hover:underline mt-1 block">Log Weight</Link>
                         </div>
                     )}
                 </div>
 
                 {/* Body Fat */}
-                <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3 block">Body Fat</p>
+                <div className="glass-panel p-5 sm:p-6 rounded-2xl flex flex-col justify-between group glass-panel-hover">
+                    <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest font-mono mb-2">Body Fat</p>
                     {stats?.currentBodyFat ? (
-                        <p className="text-5xl font-bebas text-[#00E5FF]">{stats.currentBodyFat}<span className="text-lg font-mono text-[#00E5FF] ml-1">%</span></p>
+                        <p className="text-3xl sm:text-4xl font-bold text-white">{stats.currentBodyFat}<span className="text-lg font-mono text-gray-500 ml-1">%</span></p>
                     ) : (
-                        <div className="h-full flex flex-col justify-end">
-                            <p className="text-xl font-bebas text-gray-600 tracking-widest">No Data</p>
-                            <Link to="/progress" className="text-[10px] text-[#00E5FF] uppercase font-bold tracking-widest hover:underline mt-1 block">Calculate Now</Link>
+                        <div>
+                            <p className="text-lg sm:text-xl font-bold text-gray-600">--</p>
+                            <Link to="/progress" className="text-[10px] text-gym-blue uppercase font-bold tracking-widest hover:underline mt-1 block">Calculate Now</Link>
                         </div>
                     )}
                 </div>
 
                 {/* PRs */}
-                <div className="card-3d-item p-6 rounded-[2rem] hover:-translate-y-1 transition-transform border-[#333]">
-                    <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-3 block">Active PRs</p>
+                <div className="glass-panel p-5 sm:p-6 rounded-2xl flex flex-col justify-between group glass-panel-hover">
+                    <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest font-mono mb-2">Active PRs</p>
                     {stats?.activePRs > 0 ? (
-                        <p className="text-5xl font-bebas text-[#FF0055]">{stats.activePRs}<span className="text-sm text-[#FF0055] ml-2">👑</span></p>
+                        <p className="text-3xl sm:text-4xl font-bold text-white line-clamp-1">{stats.activePRs}<span className="text-sm ml-2">🏆</span></p>
                     ) : (
-                        <div className="h-full flex flex-col justify-end">
-                            <p className="text-xl font-bebas text-gray-600 tracking-widest">No Data</p>
+                        <div>
+                            <p className="text-lg sm:text-xl font-bold text-gray-600">--</p>
                             <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1 block">Keep Pushing</p>
                         </div>
                     )}

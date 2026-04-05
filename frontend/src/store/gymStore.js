@@ -25,8 +25,7 @@ const useGymStore = create(
             currentWeekStart: null,
             showNewWeekSummary: null,
 
-            _hasHydrated: false,
-            setHasHydrated: (state) => set({ _hasHydrated: state }),
+            // Removed SSR-specific hydration flag to prevent silent SPA render locks
 
             // --- Split Actions ---
             setActiveSplitId: (id) => set({ activeSplitId: id }),
@@ -110,8 +109,11 @@ const useGymStore = create(
         }),
         {
             name: 'gym-routine-storage',
-            onRehydrateStorage: () => (state) => {
-                if (state) state.setHasHydrated(true);
+            onRehydrateStorage: () => (state, error) => {
+                if (error) {
+                    console.warn("Failed to hydrate gym-routine-storage, local storage may be corrupted:", error);
+                    localStorage.removeItem('gym-routine-storage');
+                }
             }
         }
     )

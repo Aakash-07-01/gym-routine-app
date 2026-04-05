@@ -24,46 +24,46 @@ function SortableExercise({ exercise, onToggle, onOpenVideo, isLocked, suggestio
     const isChecked = isLocked || exercise.completed;
 
     return (
-        <div ref={setNodeRef} style={style} className={`card-3d-item p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center gap-4 transition-all duration-300 transform ${isChecked ? 'border-[#00E5FF]/40 border-b-[#00E5FF]/20 opacity-90 grayscale-[30%]' : 'hover:-translate-y-1 hover:border-[#FF0055]/50'} ${isLocked ? 'cursor-not-allowed' : ''}`}>
+        <div ref={setNodeRef} style={style} className={`glass-panel p-5 flex flex-col sm:flex-row sm:items-center gap-4 transition-all duration-300 ${isChecked ? 'border-gym-blue/40 opacity-80 bg-gym-blue/5' : 'glass-panel-hover'} ${isLocked ? 'cursor-not-allowed' : ''}`}>
             <div className="flex items-center gap-4 w-full sm:w-auto">
                 <div {...attributes} {...listeners} className={`cursor-grab shrink-0 ${isLocked ? 'pointer-events-none opacity-0' : 'text-gray-500 hover:text-white'}`}>
                     <GripVertical size={20} />
                 </div>
 
-                <button onClick={() => onToggle(exercise.id)} className={`transition-transform active:scale-95 shrink-0 ${isLocked ? 'cursor-not-allowed cursor-default' : 'text-[#00E5FF]'}`}>
-                    {isChecked ? <CheckCircle size={28} className="text-[#00E5FF] drop-shadow-[0_0_8px_rgba(0,229,255,0.6)]" /> : <Circle size={28} className="text-gray-400 hover:text-white" />}
+                <button onClick={() => onToggle(exercise.id)} className={`transition-transform active:scale-95 shrink-0 ${isLocked ? 'cursor-not-allowed cursor-default' : 'text-gym-blue'}`}>
+                    {isChecked ? <CheckCircle size={28} className="text-gym-blue drop-shadow-[0_0_10px_rgba(0,122,255,0.6)]" /> : <Circle size={28} className="text-gray-400 hover:text-white" />}
                 </button>
                 <div className="flex-1 sm:hidden">
-                    <h4 className={`text-base font-bold uppercase tracking-wider transition-all ${isChecked ? 'line-through text-gray-500' : 'text-white drop-shadow-sm'}`}>
+                    <h4 className={`text-base font-bold tracking-wide transition-all ${isChecked ? 'line-through text-gray-500' : 'text-white'}`}>
                         {exercise.name}
                     </h4>
                 </div>
-                <button onClick={onOpenVideo} className="text-[#FF0055] hover:text-white p-2 sm:hidden shrink-0 ml-auto" title="Watch Tutorial">
+                <button onClick={onOpenVideo} className="text-gym-red hover:text-white p-2 sm:hidden shrink-0 ml-auto" title="Watch Tutorial">
                     <PlayCircle size={28} />
                 </button>
             </div>
 
-            <div className="flex-1 hidden sm:block ml-2">
+            <div className="flex-1 hidden sm:block ml-2 w-full max-w-sm">
                 {suggestion && !isChecked && (
-                    <div className="text-[10px] text-[#FF0055] font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
+                    <div className="text-[10px] text-gym-red font-bold uppercase tracking-widest mb-1 flex items-center gap-1">
                         🚀 {suggestion}
                     </div>
                 )}
-                <h4 className={`text-2xl font-bebas tracking-widest uppercase transition-all ${isChecked ? 'line-through text-gray-600' : 'text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]'}`}>
+                <h4 className={`text-xl font-bold tracking-wide transition-all ${isChecked ? 'line-through text-gray-600' : 'text-white drop-shadow-sm'} truncate`}>
                     {exercise.name}
                 </h4>
-                <p className="text-sm font-mono text-[#C8FF00] font-bold mt-1 tracking-widest">
+                <p className="text-sm font-mono text-gym-accent font-bold mt-1 tracking-widest">
                     {exercise.sets} SETS × {exercise.reps} REPS {exercise.weight ? `| ${exercise.weight}` : ''}
                 </p>
             </div>
 
             <div className="sm:hidden pl-12 mt-1">
-                <p className="text-sm font-mono text-[#C8FF00] font-bold tracking-widest">
+                <p className="text-sm font-mono text-gym-accent font-bold tracking-widest">
                     {exercise.sets} SETS × {exercise.reps} REPS {exercise.weight ? `| ${exercise.weight}` : ''}
                 </p>
             </div>
 
-            <button onClick={onOpenVideo} className="text-[#FF0055] hover:text-white hover:scale-110 transition-transform p-3 hidden sm:block shrink-0 drop-shadow-[0_0_10px_rgba(255,0,85,0.3)]" title="Watch Tutorial">
+            <button onClick={onOpenVideo} className="text-gym-red hover:text-white hover:scale-110 transition-transform p-3 hidden sm:block shrink-0 drop-shadow-[0_0_8px_rgba(255,59,48,0.3)] ml-auto" title="Watch Tutorial">
                 <PlayCircle size={32} />
             </button>
         </div>
@@ -75,10 +75,9 @@ export default function Routine() {
     const { activeSplitId, splits, logWorkout, workoutLog } = useGymStore();
     const activeSplitRaw = splits.find(s => s.id === activeSplitId);
 
-    // FIX: Fallback to reading fresh schedule mapped default data if missing from older saved localStorage state.
+    // Default to a fallback if split is missing, standardizing logic.
     const activeSplit = activeSplitRaw?.isDefault ? (defaultSplits.find(s => s.id === activeSplitRaw.id) || activeSplitRaw) : activeSplitRaw;
 
-    // Safety fallback for custom templates
     const getFallbackSchedule = (days) => {
         if (!days || days.length === 0) return ['rest', 'rest', 'rest', 'rest', 'rest', 'rest', 'rest'];
         return [0, 1, 2, 3, 4, 5, 6].map(i => days[i % days.length]?.id || 'rest');
@@ -104,7 +103,7 @@ export default function Routine() {
     const todayStr = new Date().toISOString().split('T')[0];
     const todayLog = workoutLog.find(l => l.date === todayStr);
     const isLockedToday = !!todayLog;
-    const isViewingTodaysCompletedLog = isLockedToday && (selectedDayIndex === todayIndex); // Disable interactions if viewing today and it's locked
+    const isViewingTodaysCompletedLog = isLockedToday && (selectedDayIndex === todayIndex);
 
     useEffect(() => {
         if (activeSplit && scheduledDayId && !isRestDay) {
@@ -113,7 +112,6 @@ export default function Routine() {
                 setExercises(day.exercises.map(ex => ({ ...ex, completed: false })));
 
                 if (token && selectedDayIndex === todayIndex) {
-                    // Check rest advisory
                     fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/workout/rest-advisory`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     }).then(res => res.json()).then(data => {
@@ -144,8 +142,8 @@ export default function Routine() {
         return (
             <div className="text-center py-24 flex flex-col items-center">
                 <p className="text-gray-400 font-mono mb-8 text-xl">No active routine selected.</p>
-                <Link to="/splits" className="btn-3d-cyan text-black font-bebas text-3xl tracking-widest py-4 px-12 rounded-xl transition-transform">
-                    Find a Routine
+                <Link to="/templates" className="glass-button font-bold text-lg px-8 py-4 rounded-xl transition-transform">
+                    View Library
                 </Link>
             </div>
         );
@@ -166,7 +164,7 @@ export default function Routine() {
     const handleToggle = (id) => {
         if (isViewingTodaysCompletedLog) return;
         if (selectedDayIndex !== todayIndex) {
-            toast('You can only track today\'s workout.', { icon: 'ℹ️', style: { borderRadius: '10px', background: '#333', color: '#00E5FF' } });
+            toast('You can only track today\'s workout.', { icon: 'ℹ️', style: { borderRadius: '10px', background: '#111', color: '#007AFF', border: '1px solid #333' } });
             return;
         }
         if (isLockedToday) {
@@ -207,7 +205,7 @@ export default function Routine() {
             body: JSON.stringify(payload)
         }).catch(err => console.error(err));
 
-        toast.success(`${dayName} Completed!`, { icon: '🔥', style: { borderRadius: '12px', background: '#00E5FF', color: '#000', fontWeight: 'bold' } });
+        toast.success(`${dayName} Completed!`, { icon: '🔥', style: { borderRadius: '12px', background: '#007AFF', color: '#FFF', fontWeight: 'bold' } });
         setExercises(items => items.map(ex => ({ ...ex, completed: true })));
         logWorkout(activeSplit.id, scheduledDayId);
 
@@ -232,20 +230,20 @@ export default function Routine() {
     ];
 
     return (
-        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} className="max-w-5xl mx-auto space-y-10 relative pb-32">
-            {showConfetti && <div className="fixed inset-0 z-50 pointer-events-none"><Confetti recycle={false} numberOfPieces={800} gravity={0.2} colors={['#C8FF00', '#00E5FF', '#FF0055']} /></div>}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="max-w-5xl mx-auto space-y-10 relative pb-12">
+            {showConfetti && <div className="fixed inset-0 z-50 pointer-events-none"><Confetti recycle={false} numberOfPieces={800} gravity={0.2} colors={['#C8FF00', '#007AFF', '#FF3B30']} /></div>}
 
             {/* Lock Modal Overlay */}
             <AnimatePresence>
                 {showLockModal && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={() => setShowLockModal(false)} />
-                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 30 }} className="relative card-3d p-10 max-w-md w-full text-center">
-                            <button onClick={() => setShowLockModal(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white bg-black p-2 rounded-full"><X size={20} /></button>
-                            <span className="text-[80px] mb-4 block drop-shadow-xl">💪</span>
-                            <h2 className="text-4xl font-bebas text-white tracking-widest mb-4">You've already crushed today's workout!</h2>
-                            <p className="text-gray-400 mb-8 font-mono text-sm leading-relaxed">Come back tomorrow for <strong className="text-[#00E5FF] text-base">{nextDayName}</strong>.<br />Rest, recover, and grow.</p>
-                            <button onClick={() => setShowLockModal(false)} className="w-full btn-3d-cyan text-black font-bebas text-2xl tracking-widest py-4 rounded-xl">Understood, Boss</button>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setShowLockModal(false)} />
+                        <motion.div initial={{ scale: 0.95, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 30 }} className="relative glass-panel p-10 max-w-md w-full text-center">
+                            <button onClick={() => setShowLockModal(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white p-2 rounded-full"><X size={20} /></button>
+                            <span className="text-[60px] mb-4 block drop-shadow-lg">💪</span>
+                            <h2 className="text-3xl font-bold text-white tracking-tight mb-4">Workout Complete!</h2>
+                            <p className="text-gray-400 mb-8 text-sm leading-relaxed">Come back tomorrow for <strong className="text-gym-blue block mt-2 text-lg">{nextDayName}</strong><br />Rest, recover, and grow.</p>
+                            <button onClick={() => setShowLockModal(false)} className="w-full glass-button font-bold text-lg py-4 rounded-xl uppercase">Got It</button>
                         </motion.div>
                     </div>
                 )}
@@ -255,29 +253,32 @@ export default function Routine() {
             <AnimatePresence>
                 {needsRest && !restSoftBypassed && !isLockedToday && selectedDayIndex === todayIndex && !isRestDay && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/90 backdrop-blur-xl" />
-                        <motion.div initial={{ scale: 0.9, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 30 }} className="relative card-3d p-10 max-w-md w-full text-center border-[#FF0055]">
-                            <span className="text-[80px] mb-4 block drop-shadow-xl">🛌</span>
-                            <h2 className="text-4xl font-bebas text-white tracking-widest mb-4">Central Nervous System Fatigue Protocol!</h2>
-                            <p className="text-gray-400 mb-8 font-mono text-sm leading-relaxed">You have trained 5 or more days consecutively. Muscle is built during recovery, not in the gym.<br /><br />We strongly advise taking a Rest Day.</p>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-xl" />
+                        <motion.div initial={{ scale: 0.95, opacity: 0, y: 30 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.95, opacity: 0, y: 30 }} className="relative glass-panel p-10 max-w-md w-full text-center border-gym-red/50 shadow-[0_0_30px_rgba(255,59,48,0.2)]">
+                            <span className="text-[60px] mb-4 block drop-shadow-lg">🛌</span>
+                            <h2 className="text-2xl font-bold text-white mb-4">Fatigue Protocol</h2>
+                            <p className="text-gray-400 mb-8 text-sm leading-relaxed">You have trained 5 or more days consecutively. Muscle is built during recovery, not in the gym.<br /><br />We strongly advise taking a Rest Day.</p>
                             <div className="space-y-4">
-                                <Link to="/history" className="w-full btn-3d-cyan text-black font-bebas text-2xl tracking-widest py-4 rounded-xl flex items-center justify-center">Take a Rest Day</Link>
-                                <button onClick={() => setRestSoftBypassed(true)} className="w-full text-gray-500 font-bebas tracking-widest uppercase hover:text-white transition-colors">Bypass & Train Anyway (Not Recommended)</button>
+                                <Link to="/history" className="w-full glass-button bg-gym-blue/20 border-gym-blue/50 text-white font-bold text-lg py-4 rounded-xl flex items-center justify-center">Take a Rest Day</Link>
+                                <button onClick={() => setRestSoftBypassed(true)} className="w-full text-gray-500 text-xs font-mono uppercase tracking-widest hover:text-white transition-colors">Bypass & Train Anyway (Risk Injury)</button>
                             </div>
                         </motion.div>
                     </div>
                 )}
             </AnimatePresence>
 
-            <header className="flex justify-between items-end bg-gym-surfaceElevated p-6 rounded-[2rem] border-b-4 border-gym-border shadow-2xl">
-                <div>
-                    <h1 className="text-6xl font-bebas text-[#C8FF00] tracking-widest uppercase mb-2 drop-shadow-[0_2px_10px_rgba(200,255,0,0.3)]">{activeSplit.name}</h1>
-                    <p className="text-gray-300 font-mono tracking-wider text-sm">Track your weekly scheduled workouts and rest days.</p>
+            <header className="glass-panel p-6 sm:p-8 flex items-end justify-between bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] overflow-hidden relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-[#0B0B0B]/60 to-transparent"></div>
+                <div className="relative z-10 w-full flex justify-between items-end">
+                    <div>
+                        <h1 className="text-4xl sm:text-5xl font-extrabold text-gym-blue tracking-tight mb-2 drop-shadow-[0_2px_15px_rgba(0,122,255,0.4)]">{activeSplit.name}</h1>
+                        <p className="text-gray-300 font-mono tracking-wider text-sm">Scheduled protocol execution.</p>
+                    </div>
                 </div>
             </header>
 
-            {/* Horizontal Week Strip (7 Days) - 3D Blocks */}
-            <div className="flex overflow-x-auto gap-5 pb-8 pt-4 snap-x hide-scrollbar px-2">
+            {/* Horizontal Week Strip (7 Days) - Glass Pills */}
+            <div className="flex overflow-x-auto gap-4 sm:gap-5 pb-6 pt-2 snap-x scrollbar-hide px-2">
                 {weekDaysList.map((wd) => {
                     const isActive = wd.index === selectedDayIndex;
                     const mappedDayId = activeSchedule[wd.index];
@@ -285,30 +286,34 @@ export default function Routine() {
                     const activeDayTitle = isRest ? "REST" : (activeSplit.days.find(d => d.id === mappedDayId)?.name || 'Unknown');
                     const isPassedCompleted = isLockedToday && wd.index === todayIndex;
 
-                    let structuralClass = 'bg-[#151515] border-2 border-[#222] border-b-4 border-b-[#000] text-gray-500 hover:translate-y-[-2px] hover:border-[#444]';
+                    let structuralClass = 'bg-white/5 border border-white/5 text-gray-500 hover:bg-white/10 glass-panel-hover opacity-70';
                     let titleColor = 'text-gray-400';
 
                     if (isActive) {
                         if (isRest) {
-                            structuralClass = 'bg-[#1A1A1A] border-2 border-l-[#FF0055]/50 border-t-[#FF0055]/50 border-r-[#AA0039] border-b-6 border-b-[#AA0039] text-white shadow-[0_15px_30px_rgba(255,0,85,0.4)] scale-105 -translate-y-1';
-                            titleColor = 'text-[#FF0055] drop-shadow-[0_0_8px_rgba(255,0,85,0.8)]';
+                            structuralClass = 'bg-gym-red/10 border-gym-red/40 shadow-[0_4px_20px_rgba(255,59,48,0.2)] opacity-100 scale-[1.02] -translate-y-1';
+                            titleColor = 'text-gym-red drop-shadow-sm font-bold';
                         } else {
-                            structuralClass = 'bg-[#1A1A1A] border-2 border-l-[#00E5FF]/50 border-t-[#00E5FF]/50 border-r-[#0099AA] border-b-6 border-b-[#0099AA] text-white shadow-[0_15px_30px_rgba(0,229,255,0.3)] scale-105 -translate-y-1';
-                            titleColor = 'text-[#00E5FF] drop-shadow-[0_0_8px_rgba(0,229,255,0.8)]';
+                            structuralClass = 'bg-gym-blue/10 border-gym-blue/40 shadow-[0_4px_20px_rgba(0,122,255,0.2)] opacity-100 scale-[1.02] -translate-y-1';
+                            titleColor = 'text-gym-blue drop-shadow-sm font-bold';
                         }
                     } else if (isRest) {
-                        titleColor = 'text-[#FF0055]/50';
+                        titleColor = 'text-gym-red/60';
+                    } else {
+                        titleColor = 'text-gray-300';
                     }
 
                     return (
                         <button
                             key={wd.index}
                             onClick={() => setSelectedDayIndex(wd.index)}
-                            className={`snap-center shrink-0 min-w-[140px] px-5 py-6 rounded-2xl text-left transition-all duration-300 transform ${structuralClass}`}
+                            className={`snap-center shrink-0 min-w-[130px] sm:min-w-[150px] px-5 py-4 rounded-xl text-left transition-all duration-300 transform backdrop-blur-md ${structuralClass}`}
                         >
-                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest block mb-2">{wd.label} {wd.index === todayIndex ? "• TODAY" : ""}</span>
-                            <h3 className={`font-bebas text-3xl tracking-widest uppercase leading-none ${titleColor} break-words whitespace-normal`}>{activeDayTitle}</h3>
-                            {isPassedCompleted && !isRest && <div className="mt-4 bg-[#00E5FF]/20 border border-[#00E5FF]/50 text-[#00E5FF] px-2 py-1 rounded inline-block text-[10px] font-bold uppercase tracking-widest">Completed</div>}
+                            <div className="flex justify-between items-center mb-1">
+                                <span className={`text-[10px] font-bold uppercase tracking-widest ${isActive ? 'text-white' : 'text-gray-500'}`}>{wd.label} {wd.index === todayIndex ? "• TODAY" : ""}</span>
+                                {isPassedCompleted && !isRest && <div className="w-2 h-2 rounded-full bg-gym-green shadow-[0_0_8px_rgba(52,199,89,0.8)]"></div>}
+                            </div>
+                            <h3 className={`font-semibold text-lg sm:text-xl tracking-tight leading-tight mt-1 ${titleColor} truncate whitespace-normal`}>{activeDayTitle}</h3>
                         </button>
                     )
                 })}
@@ -316,32 +321,39 @@ export default function Routine() {
 
             {/* Main Content Area */}
             {isRestDay ? (
-                <RestDay />
+                <div className="glass-panel p-8 sm:p-16 flex flex-col items-center justify-center text-center">
+                    <span className="text-[80px] drop-shadow-lg mb-6">⛺</span>
+                    <h2 className="text-3xl font-bold text-white mb-2">Rest Day</h2>
+                    <p className="text-gray-400 font-mono text-sm max-w-md">Take it easy. Recovery is when the muscle actually rebuilds stronger for the next session.</p>
+                </div>
             ) : (
-                <div className={`card-3d p-6 sm:p-10 ${isViewingTodaysCompletedLog ? 'border-[#00E5FF] shadow-[0_20px_40px_rgba(0,229,255,0.2)]' : (isAllComplete ? 'border-[#C8FF00]' : '')}`}>
-                    <div className="flex justify-between items-center mb-10 border-b-2 border-[#222] pb-6 flex-wrap gap-4">
-                        <h2 className="text-4xl font-bebas uppercase text-white tracking-widest drop-shadow-md">{activeSplit.days.find(d => d.id === scheduledDayId)?.name}</h2>
+                <div className={`glass-panel p-6 sm:p-10 transition-colors duration-500 relative ${isViewingTodaysCompletedLog ? 'border-gym-green/30 bg-gym-green/5' : (isAllComplete ? 'border-gym-accent/30 bg-gym-accent/5' : '')}`}>
+                    <div className="flex flex-col sm:flex-row justify-between items-start md:items-center mb-8 border-b border-white/10 pb-6 gap-6">
+                        <div className="flex-1">
+                            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight drop-shadow-md">{activeSplit.days.find(d => d.id === scheduledDayId)?.name}</h2>
+                            {isViewingTodaysCompletedLog && <p className="text-gym-green font-mono text-sm mt-1 uppercase tracking-widest flex items-center gap-2"><CheckCircle size={14} /> Completed</p>}
+                        </div>
 
                         {selectedDayIndex === todayIndex && (
                             <button
                                 onClick={handleCompleteDay}
                                 disabled={exercises.length === 0 || isViewingTodaysCompletedLog}
-                                className={`text-black font-bebas text-2xl tracking-widest uppercase px-10 py-3 rounded-xl ${isViewingTodaysCompletedLog ? 'bg-[#00E5FF] shadow-[0_4px_0_0_#0099AA] opacity-70 cursor-not-allowed hover:none translate-y-1' : 'btn-3d-lime'}`}
+                                className={`font-bold text-sm tracking-widest uppercase px-8 py-4 rounded-xl flex-shrink-0 w-full sm:w-auto transition-all ${isViewingTodaysCompletedLog ? 'bg-gym-green/20 text-gym-green border border-gym-green/30 cursor-not-allowed' : 'glass-button bg-gym-blue/20 hover:bg-gym-blue/30 border-gym-blue/50 text-white shadow-[0_0_20px_rgba(0,122,255,0.2)]'}`}
                             >
-                                {isViewingTodaysCompletedLog ? 'SESSION LOCKED' : 'COMPLETE DAY'}
+                                {isViewingTodaysCompletedLog ? 'Session Locked' : 'Finish Workout'}
                             </button>
                         )}
                         {selectedDayIndex !== todayIndex && (
-                            <span className="text-gray-500 font-bebas tracking-widest text-xl uppercase bg-black px-6 py-3 rounded-xl border-b-4 border-[#111]">View Only</span>
+                            <span className="text-gray-500 font-mono tracking-widest text-xs uppercase bg-white/5 border border-white/10 px-4 py-2 rounded-lg w-full sm:w-auto text-center flex-shrink-0">Read Only</span>
                         )}
                     </div>
 
                     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                         <SortableContext items={exercises} strategy={verticalListSortingStrategy}>
-                            <div className="space-y-5">
+                            <div className="space-y-4">
                                 <AnimatePresence>
                                     {exercises.map(exercise => (
-                                        <motion.div key={exercise.id} layout initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }}>
+                                        <motion.div key={exercise.id} layout initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9 }}>
                                             <SortableExercise
                                                 exercise={exercise}
                                                 onToggle={handleToggle}
@@ -353,8 +365,8 @@ export default function Routine() {
                                     ))}
                                 </AnimatePresence>
                                 {exercises.length === 0 && (
-                                    <div className="text-center py-20 bg-black/40 rounded-3xl border-2 border-dashed border-[#333]">
-                                        <p className="text-gray-500 font-mono tracking-widest text-lg">NO EXERCISES FOUND</p>
+                                    <div className="text-center py-24 bg-white/5 rounded-3xl border-2 border-dashed border-white/10">
+                                        <p className="text-gray-500 font-mono tracking-widest text-sm uppercase">No Exercises Configured.</p>
                                     </div>
                                 )}
                             </div>

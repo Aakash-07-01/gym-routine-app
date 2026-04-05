@@ -1,7 +1,18 @@
 import { create } from 'zustand';
 
+const getSafeUser = () => {
+    try {
+        const item = localStorage.getItem('gym_user');
+        return item ? JSON.parse(item) : null;
+    } catch (e) {
+        console.warn('Failed to parse gym_user string from localStorage, clearing it.', e);
+        localStorage.removeItem('gym_user');
+        return null;
+    }
+};
+
 const useAuthStore = create((set) => ({
-    user: localStorage.getItem('gym_user') ? JSON.parse(localStorage.getItem('gym_user')) : null,
+    user: getSafeUser(),
     token: localStorage.getItem('token') || null,
     isAuthenticated: !!localStorage.getItem('token'),
 

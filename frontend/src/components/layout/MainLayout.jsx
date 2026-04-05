@@ -1,11 +1,18 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { Home, Calendar, LayoutList, History, Settings, LogOut, Dumbbell, Shield } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
+import { useState, useEffect } from 'react';
 
 export default function MainLayout() {
     const logout = useAuthStore(state => state.logout);
     const user = useAuthStore(state => state.user);
     const navigate = useNavigate();
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+        return () => clearInterval(timer);
+    }, []);
 
     const handleLogout = () => {
         logout();
@@ -14,10 +21,9 @@ export default function MainLayout() {
 
     const navItems = [
         { to: '/', icon: Home, label: 'Dashboard' },
-        { to: '/routine', icon: Calendar, label: 'My Routine' },
-        { to: '/templates', icon: LayoutList, label: 'Templates' },
+        { to: '/routine', icon: Calendar, label: 'Routine' },
+        { to: '/templates', icon: LayoutList, label: 'Library' },
         { to: '/history', icon: History, label: 'History' },
-        { to: '/settings', icon: Settings, label: 'Settings' },
     ];
 
     if (user?.username === 'admin') {
@@ -25,58 +31,91 @@ export default function MainLayout() {
     }
 
     return (
-        <div className="min-h-screen bg-gym-dark flex flex-col md:flex-row">
-            {/* Sidebar for Desktop */}
-            <aside className="hidden md:flex flex-col w-64 bg-gym-gray border-r border-gym-light p-4">
-                <div className="flex items-center gap-3 text-gym-blue font-bold text-2xl mb-8 px-2">
-                    <Dumbbell size={32} />
-                    <span>FitApp</span>
+        <div className="relative min-h-screen bg-gym-dark overflow-hidden flex flex-col font-inter">
+            {/* Ambient Background Glows */}
+            <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-gym-blue opacity-[0.07] blur-[140px] pointer-events-none"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-gym-accent opacity-[0.03] blur-[120px] pointer-events-none"></div>
+
+            {/* Top Menu Bar (OS Style) */}
+            <header className="glass-panel mx-4 mt-4 px-6 py-3 flex items-center justify-between z-40 shadow-xl border border-white/5 relative bg-[#0b0b0b]/60">
+                <div className="flex items-center gap-6">
+                    <div className="flex gap-2.5">
+                        <div className="w-3.5 h-3.5 rounded-full bg-gym-red shadow-[0_0_10px_rgba(255,59,48,0.4)] border border-white/10"></div>
+                        <div className="w-3.5 h-3.5 rounded-full bg-yellow-500 shadow-[0_0_10px_rgba(250,204,21,0.4)] border border-white/10"></div>
+                        <div className="w-3.5 h-3.5 rounded-full bg-gym-green shadow-[0_0_10px_rgba(52,199,89,0.4)] border border-white/10"></div>
+                    </div>
+                    <div className="flex items-center gap-3 text-white font-bold tracking-tight">
+                        <Dumbbell size={20} className="text-gym-blue" />
+                        <span className="text-lg">FitOS</span>
+                    </div>
                 </div>
-                <nav className="flex-1 space-y-2">
+
+                <div className="hidden md:flex items-center gap-6">
+                    <span className="text-sm text-gray-300 font-mono tracking-widest bg-white/5 px-4 py-1 rounded-full border border-white/10 shadow-inner">
+                        {currentTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} • {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                    <div className="flex items-center gap-4 pl-4 border-l border-white/10">
+                        <button onClick={() => navigate('/settings')} className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full">
+                            <Settings size={18} />
+                        </button>
+                        <button onClick={handleLogout} className="text-gray-400 hover:text-gym-red transition-colors p-2 hover:bg-white/10 rounded-full">
+                            <LogOut size={18} />
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            {/* Main Application Window */}
+            <main className="flex-1 overflow-visible relative z-30 p-4 md:p-6 lg:p-8 flex justify-center items-start pt-6 h-full pb-32">
+                <div className="w-full max-w-7xl glass-panel h-[calc(100vh-180px)] flex flex-col overflow-hidden relative shadow-2xl border border-white/10 bg-[#121212]/80">
+                    <div className="flex-1 overflow-y-auto p-4 md:p-8 scrollbar-hide">
+                        <Outlet />
+                    </div>
+                </div>
+            </main>
+
+            {/* Floating Bottom Dock */}
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+                <nav className="glass-panel px-3 py-3 flex items-center justify-center gap-2 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 rounded-2xl bg-[#080808]/80">
                     {navItems.map((item) => (
                         <NavLink
                             key={item.to}
                             to={item.to}
                             className={({ isActive }) =>
-                                `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive ? 'bg-gym-blue text-white' : 'text-gray-400 hover:bg-gym-light hover:text-white'
+                                `relative group flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl transition-all duration-300 ease-out ${isActive ? 'bg-white/10 text-white transform -translate-y-3 shadow-[0_10px_20px_rgba(0,122,255,0.2)] border border-white/10 outline outline-1 outline-gym-blue/30' : 'text-gray-400 hover:text-white hover:bg-white/5 hover:-translate-y-2'
                                 }`
                             }
                         >
-                            <item.icon size={20} />
-                            <span>{item.label}</span>
+                            {({ isActive }) => (
+                                <>
+                                    <item.icon size={26} className={`transition-all duration-300 ${isActive ? 'text-gym-blue drop-shadow-[0_0_8px_rgba(0,122,255,0.8)]' : ''}`} />
+                                    {/* App Label Tooltip */}
+                                    <span className="absolute -top-12 scale-0 group-hover:scale-100 transition-transform origin-bottom bg-[#1a1a1a]/95 text-white text-xs px-3 py-1.5 rounded-md shadow-xl border border-white/10 whitespace-nowrap font-medium tracking-wide">
+                                        {item.label}
+                                    </span>
+                                </>
+                            )}
                         </NavLink>
                     ))}
-                </nav>
-                <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gym-light hover:text-red-400 transition-colors mt-auto"
-                >
-                    <LogOut size={20} />
-                    <span>Logout</span>
-                </button>
-            </aside>
 
-            {/* Main Content Area */}
-            <main className="flex-1 overflow-y-auto pb-20 md:pb-0 p-4 md:p-8">
-                <Outlet />
-            </main>
-
-            {/* Bottom Nav for Mobile */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-gym-gray border-t border-gym-light flex justify-around items-center p-3 z-50">
-                {navItems.map((item) => (
-                    <NavLink
-                        key={item.to}
-                        to={item.to}
-                        className={({ isActive }) =>
-                            `flex flex-col items-center gap-1 p-2 ${isActive ? 'text-gym-blue' : 'text-gray-400'
-                            }`
-                        }
+                    {/* Mobile Only: Logout & Settings in Dock */}
+                    <div className="md:hidden w-px h-10 bg-white/10 mx-1"></div>
+                    <button
+                        onClick={() => navigate('/settings')}
+                        className="md:hidden relative group p-3 sm:p-4 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 hover:-translate-y-2"
                     >
-                        <item.icon size={24} />
-                        <span className="text-[10px]">{item.label}</span>
-                    </NavLink>
-                ))}
-            </nav>
+                        <Settings size={26} />
+                        <span className="absolute -top-12 scale-0 group-hover:scale-100 transition-transform origin-bottom bg-[#1a1a1a]/95 text-white text-xs px-3 py-1.5 rounded-md shadow-xl border border-white/10">Settings</span>
+                    </button>
+                    <button
+                        onClick={handleLogout}
+                        className="md:hidden relative group p-3 sm:p-4 text-gray-400 hover:text-gym-red hover:bg-white/5 rounded-xl transition-all duration-300 hover:-translate-y-2"
+                    >
+                        <LogOut size={26} />
+                        <span className="absolute -top-12 scale-0 group-hover:scale-100 transition-transform origin-bottom bg-[#1a1a1a]/95 text-gym-red text-xs px-3 py-1.5 rounded-md shadow-xl border border-gym-red/30">Logout</span>
+                    </button>
+                </nav>
+            </div>
         </div>
     );
 }
