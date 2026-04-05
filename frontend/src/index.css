@@ -54,6 +54,15 @@
   }
 
   /* Structural OS Panel Elements */
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
   .glass-panel {
     background: var(--color-gym-surface);
     backdrop-filter: blur(24px);
