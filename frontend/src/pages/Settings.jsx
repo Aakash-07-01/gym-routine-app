@@ -128,15 +128,26 @@ export default function Settings() {
                 </div>
             </div>
 
-            {/* Appearance */}
+            {/* Appearance & API */}
             <div className="bg-gym-gray border border-gym-light p-6 rounded-xl">
                 <div className="flex items-center gap-3 mb-4">
                     <Moon className="text-gym-blue" size={24} />
-                    <h2 className="text-xl font-bold text-white">Appearance</h2>
+                    <h2 className="text-xl font-bold text-white">Application Settings</h2>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-gym-dark">
+                <div className="flex justify-between items-center py-2 border-b border-gym-dark mb-4">
                     <span className="text-white">Dark Mode</span>
                     <span className="bg-gym-blue text-white px-3 py-1 rounded-full text-xs cursor-default">Enabled natively</span>
+                </div>
+                <div>
+                    <label className="block text-gray-400 text-sm mb-1">YouTube API Key</label>
+                    <input
+                        type="password"
+                        value={useGymStore.getState().settings?.youtubeApiKey || ''}
+                        onChange={(e) => useGymStore.getState().updateSettings({ youtubeApiKey: e.target.value })}
+                        className="w-full bg-gym-dark border border-gym-light rounded-lg px-4 py-2.5 text-white outline-none focus:border-gym-primary transition-colors"
+                        placeholder="Paste your Google API Key here..."
+                    />
+                    <p className="text-xs text-gray-500 mt-2">Required for tutorials. Stored securely on your local device—masked and never collected.</p>
                 </div>
             </div>
 
