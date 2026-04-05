@@ -12,7 +12,7 @@ export default function Admin() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/admin/users`, {
+                const response = await fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://gym-routine-backend.onrender.com' : 'http://localhost:8080')}/api/admin/users`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 if (response.status === 403) {

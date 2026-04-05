@@ -74,7 +74,7 @@ const VerifyOTP = () => {
 
         setLoading(true);
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/auth/verify-otp`, {
+            const response = await axios.post(`${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://gym-routine-backend.onrender.com' : 'http://localhost:8080')}/api/auth/verify-otp`, {
                 email: emailParam,
                 otp: otpString
             });
