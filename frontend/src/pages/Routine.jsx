@@ -198,7 +198,7 @@ export default function Routine() {
                 })));
 
                 if (token && selectedDayIndex === todayIndex) {
-                    fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://gym-routine-backend.onrender.com' : 'http://localhost:8080')}/api/workout/rest-advisory`, {
+                    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/workout/rest-advisory`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     }).then(res => res.json()).then(data => {
                         if (data.needsRest) setNeedsRest(true);
@@ -206,7 +206,7 @@ export default function Routine() {
 
                     day.exercises.forEach(async (ex) => {
                         try {
-                            const res = await fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://gym-routine-backend.onrender.com' : 'http://localhost:8080')}/api/workout/suggestion?exercise=${encodeURIComponent(ex.name)}`, {
+                            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/workout/suggestion?exercise=${encodeURIComponent(ex.name)}`, {
                                 headers: { 'Authorization': `Bearer ${token}` }
                             });
                             if (res.ok) {
@@ -338,7 +338,7 @@ export default function Routine() {
             })
         };
 
-        fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://gym-routine-backend.onrender.com' : 'http://localhost:8080')}/api/workout/complete`, {
+        fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/workout/complete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify(payload)

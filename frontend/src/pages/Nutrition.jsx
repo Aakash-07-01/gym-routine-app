@@ -22,7 +22,7 @@ export default function Nutrition() {
 
     const fetchTodayLogs = async () => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://gym-routine-backend.onrender.com' : 'http://localhost:8080')}/api/nutrition/today`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/nutrition/today`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) setLogs(await res.json());
@@ -36,7 +36,7 @@ export default function Nutrition() {
     const handleSave = async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://gym-routine-backend.onrender.com' : 'http://localhost:8080')}/api/nutrition`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/nutrition`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

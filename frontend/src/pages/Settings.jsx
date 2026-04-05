@@ -27,7 +27,7 @@ export default function Settings() {
     const handleSaveProfile = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://gym-routine-backend.onrender.com' : 'http://localhost:8080')}/api/users/profile`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/users/profile`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ export default function Settings() {
     const handleDeleteAccount = async () => {
         if (window.confirm('WARNING: This will completely delete your account and all associated data permanently. Are you absolutely sure?')) {
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://gym-routine-backend.onrender.com' : 'http://localhost:8080')}/api/users/profile`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/users/profile`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });

@@ -28,7 +28,7 @@ export default function MetricsPromptModal({ isOpen, onClose, onSuccess }) {
                 measurementMethod: "User Input"
             };
 
-            const res = await fetch(`${import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://gym-routine-backend.onrender.com' : 'http://localhost:8080')}/api/metrics`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/metrics`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
