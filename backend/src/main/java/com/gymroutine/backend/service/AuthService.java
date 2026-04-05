@@ -55,7 +55,7 @@ public class AuthService {
                 repository.save(user);
                 emailService.sendVerificationEmail(user.getEmail(), otp);
                 return AuthResponse.builder()
-                                .message("Please check your email to verify your account.")
+                                .message("Check your email for the OTP. (Test Mode OTP: " + otp + ")")
                                 .build();
         }
 
