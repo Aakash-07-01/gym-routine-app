@@ -33,6 +33,9 @@ public class AuthService {
                 if (repository.findByUsernameIgnoreCase(request.getUsername()).isPresent()) {
                         throw new RuntimeException("Username already exists");
                 }
+                if (repository.findByEmailIgnoreCase(request.getEmail()).isPresent()) {
+                        throw new RuntimeException("Email already exists");
+                }
                 String otp = String.format("%06d", new java.util.Random().nextInt(1000000));
                 var user = User.builder()
                                 .fullName(request.getFullName())
