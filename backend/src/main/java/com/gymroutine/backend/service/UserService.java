@@ -4,6 +4,7 @@ import com.gymroutine.backend.dto.UpdateProfileRequest;
 import com.gymroutine.backend.model.User;
 import com.gymroutine.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
@@ -13,6 +14,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public User updateProfile(String username, UpdateProfileRequest request) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -29,6 +31,9 @@ public class UserService {
         if (request.getStartingWeight() != null) {
             user.setStartingWeight(request.getStartingWeight());
         }
+        if (request.getCurrentWeight() != null) {
+            user.setCurrentWeight(request.getCurrentWeight());
+        }
         if (request.getPrimaryGoal() != null && !request.getPrimaryGoal().isBlank()) {
             user.setPrimaryGoal(request.getPrimaryGoal());
         }
@@ -36,9 +41,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @Transactional
     public void deleteProfile(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         userRepository.delete(user);
+        userRepository.flush();
     }
 }

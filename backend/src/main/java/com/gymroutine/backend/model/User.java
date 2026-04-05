@@ -34,6 +34,7 @@ public class User implements UserDetails {
     private String biologicalSex;
     private Double height;
     private Double startingWeight;
+    private Double currentWeight;
     private String primaryGoal;
     private String experienceLevel;
     private String unitPreference;
@@ -43,6 +44,12 @@ public class User implements UserDetails {
 
     @Column(nullable = false, columnDefinition = "varchar(255) default 'ROLE_USER'")
     private String role = "ROLE_USER";
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean emailVerified = false;
+
+    private String otpCode;
+    private LocalDateTime otpExpiry;
 
     public User() {
     }
@@ -58,6 +65,30 @@ public class User implements UserDetails {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
+    }
+
+    public String getOtpCode() {
+        return otpCode;
+    }
+
+    public void setOtpCode(String otpCode) {
+        this.otpCode = otpCode;
+    }
+
+    public LocalDateTime getOtpExpiry() {
+        return otpExpiry;
+    }
+
+    public void setOtpExpiry(LocalDateTime otpExpiry) {
+        this.otpExpiry = otpExpiry;
     }
 
     public Long getId() {
@@ -132,6 +163,14 @@ public class User implements UserDetails {
 
     public void setStartingWeight(Double startingWeight) {
         this.startingWeight = startingWeight;
+    }
+
+    public Double getCurrentWeight() {
+        return currentWeight;
+    }
+
+    public void setCurrentWeight(Double currentWeight) {
+        this.currentWeight = currentWeight;
     }
 
     public String getPrimaryGoal() {

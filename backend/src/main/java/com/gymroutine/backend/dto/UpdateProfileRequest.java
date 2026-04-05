@@ -5,6 +5,7 @@ public class UpdateProfileRequest {
     private String email;
     private Double height;
     private Double startingWeight;
+    private Double currentWeight;
     private String primaryGoal;
 
     public String getFullName() {
@@ -37,6 +38,14 @@ public class UpdateProfileRequest {
 
     public void setStartingWeight(Double startingWeight) {
         this.startingWeight = startingWeight;
+    }
+
+    public Double getCurrentWeight() {
+        return currentWeight;
+    }
+
+    public void setCurrentWeight(Double currentWeight) {
+        this.currentWeight = currentWeight;
     }
 
     public String getPrimaryGoal() {

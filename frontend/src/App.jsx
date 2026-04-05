@@ -13,6 +13,7 @@ import Nutrition from './pages/Nutrition';
 import Settings from './pages/Settings';
 import Admin from './pages/Admin';
 import CustomSplitBuilder from './pages/CustomSplitBuilder';
+import VerifyOTP from './pages/VerifyOTP';
 import useAuthStore from './store/authStore';
 import useGymStore from './store/gymStore';
 import { AnimatePresence } from 'framer-motion';
@@ -37,6 +38,7 @@ function App() {
       <Routes>
         <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" />} />
         <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/" />} />
+        <Route path="/verify-otp" element={!isAuthenticated ? <VerifyOTP /> : <Navigate to="/" />} />
 
         {/* Protected Routes */}
         <Route path="/" element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" />}>

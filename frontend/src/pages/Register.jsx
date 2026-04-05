@@ -43,9 +43,11 @@ export default function Register() {
             payload.height = parseFloat(payload.height);
             payload.startingWeight = parseFloat(payload.startingWeight);
 
-            await register(payload);
-            navigate('/');
-            toast.success('Registration complete! Welcome to GYM-JAM.', { icon: '🚀' });
+            const result = await register(payload);
+            toast.success(result.message || 'Please check your email for the OTP.', { icon: '📧', duration: 3000 });
+            setTimeout(() => {
+                navigate(`/verify-otp?email=${encodeURIComponent(payload.email)}`);
+            }, 1000);
         } catch (error) {
             toast.error(error.message || 'Registration failed');
         }

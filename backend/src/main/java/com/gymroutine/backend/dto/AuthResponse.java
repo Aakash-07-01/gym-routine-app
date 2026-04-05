@@ -2,6 +2,7 @@ package com.gymroutine.backend.dto;
 
 public class AuthResponse {
     private String token;
+    private String message;
 
     public AuthResponse() {
     }
@@ -10,8 +11,21 @@ public class AuthResponse {
         this.token = token;
     }
 
+    public AuthResponse(String token, String message) {
+        this.token = token;
+        this.message = message;
+    }
+
     public String getToken() {
         return token;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     public void setToken(String token) {
@@ -24,15 +38,22 @@ public class AuthResponse {
 
     public static class AuthResponseBuilder {
         private String token;
+        private String message;
 
         public AuthResponseBuilder token(String token) {
             this.token = token;
             return this;
         }
 
+        public AuthResponseBuilder message(String message) {
+            this.message = message;
+            return this;
+        }
+
         public AuthResponse build() {
             AuthResponse r = new AuthResponse();
-            r.token = this.token;
+            r.setToken(this.token);
+            r.setMessage(this.message);
             return r;
         }
     }

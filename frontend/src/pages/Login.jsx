@@ -1,13 +1,18 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import toast from 'react-hot-toast';
 
 export default function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [searchParams] = useSearchParams();
     const { login, isLoading } = useAuthStore();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        // Cleaned up magic link logic for OTP logic
+    }, [searchParams]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

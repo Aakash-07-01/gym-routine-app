@@ -14,6 +14,7 @@ export default function Settings() {
         fullName: user?.fullName || '',
         email: user?.email || '',
         startingWeight: user?.startingWeight || '',
+        currentWeight: user?.currentWeight || '',
         height: user?.height || '',
         primaryGoal: user?.primaryGoal || 'Muscle Gain'
     });
@@ -99,11 +100,15 @@ export default function Settings() {
                     </div>
                     <div>
                         <label className="block text-gray-400 text-sm mb-1 cursor-not-allowed">Height</label>
-                        <input type="number" name="height" value={profileForm.height} onChange={handleProfileChange} className="w-full bg-gym-dark border border-gym-light rounded-lg px-4 py-2.5 text-white outline-none focus:border-gym-primary transition-colors" />
+                        <input type="number" name="height" value={profileForm.height} disabled className="w-full bg-gym-dark border border-gym-light rounded-lg px-4 py-2.5 text-white outline-none transition-colors opacity-50 cursor-not-allowed" />
                     </div>
                     <div>
                         <label className="block text-gray-400 text-sm mb-1 cursor-not-allowed">Starting Weight</label>
-                        <input type="number" name="startingWeight" value={profileForm.startingWeight} onChange={handleProfileChange} className="w-full bg-gym-dark border border-gym-light rounded-lg px-4 py-2.5 text-white outline-none focus:border-gym-primary transition-colors" />
+                        <input type="number" name="startingWeight" value={profileForm.startingWeight} disabled className="w-full bg-gym-dark border border-gym-light rounded-lg px-4 py-2.5 text-white outline-none transition-colors opacity-50 cursor-not-allowed" />
+                    </div>
+                    <div className="md:col-span-2">
+                        <label className="block text-gray-400 text-sm mb-1">Current Weight</label>
+                        <input type="number" name="currentWeight" value={profileForm.currentWeight} onChange={handleProfileChange} className="w-full bg-gym-dark border border-gym-light rounded-lg px-4 py-2.5 text-white outline-none focus:border-gym-primary transition-colors" />
                     </div>
                     <div className="md:col-span-2">
                         <label className="block text-gray-400 text-sm mb-1">Primary Goal</label>
