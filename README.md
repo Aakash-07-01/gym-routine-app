@@ -25,15 +25,11 @@ A full-stack fitness tracking application designed to help you plan, log, and an
 - **Progress Tracking** — Visualise body metrics over time with beautiful Recharts graphs
 - **Workout History** — Complete, searchable log of every session
 
-### 🍎 Nutrition
-- **Nutrition Tracker** — Log daily macros and caloric intake
-
 ### 📝 Daily Notes
 - **Workout Notes** — Jot down daily observations, mood, energy levels, and session feedback
 
 ### 🔐 Authentication & Security
 - **JWT Authentication** — Secure token-based login and registration
-- **Email Verification** — OTP-based account verification via email
 - **Role-Based Access** — Admin panel for user and data management
 
 ### 🎨 Modern UI/UX
@@ -134,7 +130,6 @@ The app will be available at `http://localhost:5173`.
 | **History**        | Browse and search past workout sessions            |
 | **Progress**       | Body metrics charts and trend analysis             |
 | **PRs**            | Personal records showcase                          |
-| **Nutrition**      | Daily macro and calorie logging                    |
 | **Notes**          | Daily training journal                             |
 | **Settings**       | Profile and preference management                  |
 | **Admin**          | User management dashboard (admin only)             |
