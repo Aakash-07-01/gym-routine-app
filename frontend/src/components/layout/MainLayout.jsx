@@ -76,20 +76,20 @@ export default function MainLayout() {
             </main>
 
             {/* Floating Bottom Dock */}
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-                <nav className="glass-panel px-3 py-3 flex items-center justify-center gap-2 md:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 rounded-2xl bg-[#080808]/80">
+            <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-2 max-w-[calc(100vw-16px)]">
+                <nav className="glass-panel px-2 py-2 flex items-center justify-center gap-1 md:gap-3 shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-white/10 rounded-2xl bg-[#080808]/80 overflow-x-auto">
                     {navItems.map((item) => (
                         <NavLink
                             key={item.to}
                             to={item.to}
                             className={({ isActive }) =>
-                                `relative group flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl transition-all duration-300 ease-out ${isActive ? 'bg-white/10 text-white transform -translate-y-3 shadow-[0_10px_20px_rgba(0,122,255,0.2)] border border-white/10 outline outline-1 outline-gym-blue/30' : 'text-gray-400 hover:text-white hover:bg-white/5 hover:-translate-y-2'
+                                `relative group flex flex-col items-center justify-center p-2 sm:p-3 md:p-4 rounded-xl transition-all duration-300 ease-out flex-shrink-0 ${isActive ? 'bg-white/10 text-white transform -translate-y-2 md:-translate-y-3 shadow-[0_10px_20px_rgba(0,122,255,0.2)] border border-white/10 outline outline-1 outline-gym-blue/30' : 'text-gray-400 hover:text-white hover:bg-white/5 hover:-translate-y-2'
                                 }`
                             }
                         >
                             {({ isActive }) => (
                                 <>
-                                    <item.icon size={26} className={`transition-all duration-300 ${isActive ? 'text-gym-blue drop-shadow-[0_0_8px_rgba(0,122,255,0.8)]' : ''}`} />
+                                    <item.icon size={22} className={`transition-all duration-300 ${isActive ? 'text-gym-blue drop-shadow-[0_0_8px_rgba(0,122,255,0.8)]' : ''}`} />
                                     {/* App Label Tooltip */}
                                     <span className="absolute -top-12 scale-0 group-hover:scale-100 transition-transform origin-bottom bg-[#1a1a1a]/95 text-white text-xs px-3 py-1.5 rounded-md shadow-xl border border-white/10 whitespace-nowrap font-medium tracking-wide">
                                         {item.label}
@@ -100,19 +100,19 @@ export default function MainLayout() {
                     ))}
 
                     {/* Mobile Only: Logout & Settings in Dock */}
-                    <div className="md:hidden w-px h-10 bg-white/10 mx-1"></div>
+                    <div className="md:hidden w-px h-8 bg-white/10 mx-0.5"></div>
                     <button
                         onClick={() => navigate('/settings')}
-                        className="md:hidden relative group p-3 sm:p-4 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 hover:-translate-y-2"
+                        className="md:hidden relative group p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 hover:-translate-y-2 flex-shrink-0"
                     >
-                        <Settings size={26} />
+                        <Settings size={22} />
                         <span className="absolute -top-12 scale-0 group-hover:scale-100 transition-transform origin-bottom bg-[#1a1a1a]/95 text-white text-xs px-3 py-1.5 rounded-md shadow-xl border border-white/10">Settings</span>
                     </button>
                     <button
                         onClick={handleLogout}
-                        className="md:hidden relative group p-3 sm:p-4 text-gray-400 hover:text-gym-red hover:bg-white/5 rounded-xl transition-all duration-300 hover:-translate-y-2"
+                        className="md:hidden relative group p-2 sm:p-3 text-gray-400 hover:text-gym-red hover:bg-white/5 rounded-xl transition-all duration-300 hover:-translate-y-2 flex-shrink-0"
                     >
-                        <LogOut size={26} />
+                        <LogOut size={22} />
                         <span className="absolute -top-12 scale-0 group-hover:scale-100 transition-transform origin-bottom bg-[#1a1a1a]/95 text-gym-red text-xs px-3 py-1.5 rounded-md shadow-xl border border-gym-red/30">Logout</span>
                     </button>
                 </nav>

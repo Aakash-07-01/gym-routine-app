@@ -81,6 +81,14 @@ const useAuthStore = create((set) => ({
         localStorage.removeItem('token');
         localStorage.removeItem('gym_user');
         set({ user: null, token: null, isAuthenticated: false });
+    },
+
+    updateUser: (updatedData) => {
+        set((state) => {
+            const updatedUser = { ...state.user, ...updatedData };
+            localStorage.setItem('gym_user', JSON.stringify(updatedUser));
+            return { user: updatedUser };
+        });
     }
 }));
 

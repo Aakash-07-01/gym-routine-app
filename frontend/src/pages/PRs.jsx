@@ -48,9 +48,12 @@ export default function PRs() {
             </header>
 
             {prs.length === 0 ? (
-                <div className="text-center py-20 bg-[#111] rounded-2xl border border-[#333] max-w-lg mx-auto">
-                    <p className="text-gray-400 font-mono tracking-widest uppercase">No Personal Records Found</p>
-                    <p className="text-[#00E5FF] mt-2 font-bebas tracking-widest">Keep training to set your first PR!</p>
+                <div className="text-center py-20 glass-panel max-w-lg mx-auto">
+                    <p className="text-5xl mb-4">🏆</p>
+                    <p className="text-white font-bold text-xl mb-2">No Personal Records Yet</p>
+                    <p className="text-gray-400 font-mono text-sm mt-2 max-w-xs mx-auto leading-relaxed">
+                        PRs are automatically tracked when you complete a workout and hit a new max weight or rep count. Start training to earn your first record!
+                    </p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">

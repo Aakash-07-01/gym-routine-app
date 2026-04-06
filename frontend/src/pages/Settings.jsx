@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Settings() {
     const { resetData } = useGymStore();
-    const { user, token, logout } = useAuthStore();
+    const { user, token, logout, updateUser } = useAuthStore();
     const navigate = useNavigate();
 
     const [profileForm, setProfileForm] = useState({
@@ -38,10 +38,25 @@ export default function Settings() {
             if (!res.ok) throw new Error('Failed to update profile');
             const data = await res.json();
 
-            const updatedUser = { ...user, ...data };
-            localStorage.setItem('gym_user', JSON.stringify(updatedUser));
+            // Update zustand store + localStorage WITHOUT a page reload
+            updateUser(data);
+
+            // If a new currentWeight was provided, also log it to the metrics endpoint
+            if (profileForm.currentWeight && Number(profileForm.currentWeight) > 0) {
+                await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/metrics`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        bodyWeight: parseFloat(profileForm.currentWeight),
+                        measurementMethod: 'Manual Update'
+                    })
+                });
+            }
+
             toast.success('Profile updated!');
-            window.location.reload();
         } catch (err) {
             toast.error(err.message);
         } finally {
