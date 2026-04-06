@@ -29,19 +29,6 @@ public class AuthController {
         return ResponseEntity.ok(authService.authenticate(request));
     }
 
-    @PostMapping("/verify-otp")
-    public ResponseEntity<java.util.Map<String, String>> verifyOtp(@RequestBody java.util.Map<String, String> request) {
-        String email = request.get("email");
-        String otp = request.get("otp");
-        boolean success = authService.verifyOtp(email, otp);
-        if (success) {
-            return ResponseEntity.ok(java.util.Map.of("message", "Email verified successfully! You can now log in."));
-        } else {
-            return ResponseEntity.status(400)
-                    .body(java.util.Map.of("message", "Invalid or expired OTP."));
-        }
-    }
-
     @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
     public ResponseEntity<java.util.Map<String, String>> handleBadCredentials(
             org.springframework.security.authentication.BadCredentialsException ex) {

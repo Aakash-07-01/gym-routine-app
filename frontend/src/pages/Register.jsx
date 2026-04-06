@@ -44,9 +44,9 @@ export default function Register() {
             payload.startingWeight = parseFloat(payload.startingWeight);
 
             const result = await register(payload);
-            toast.success(result.message || 'Please check your email for the OTP.', { icon: '📧', duration: 3000 });
+            toast.success(result.message || 'Registration successful. You can now login.', { icon: '✅', duration: 3000 });
             setTimeout(() => {
-                navigate(`/verify-otp?email=${encodeURIComponent(payload.email)}`);
+                navigate(`/login`);
             }, 1000);
         } catch (error) {
             toast.error(error.message || 'Registration failed');

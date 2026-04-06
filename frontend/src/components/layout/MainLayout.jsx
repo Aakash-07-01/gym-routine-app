@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Home, Calendar, LayoutList, History, Settings, LogOut, Dumbbell, Shield } from 'lucide-react';
+import { Home, Calendar, LayoutList, History, Settings, LogOut, Dumbbell, Shield, Trophy } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import { useState, useEffect } from 'react';
 
@@ -24,6 +24,7 @@ export default function MainLayout() {
         { to: '/routine', icon: Calendar, label: 'Routine' },
         { to: '/templates', icon: LayoutList, label: 'Library' },
         { to: '/history', icon: History, label: 'History' },
+        { to: '/prs', icon: Trophy, label: 'PRs' },
     ];
 
     if (user?.username === 'admin') {

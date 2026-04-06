@@ -170,7 +170,7 @@ export default function Dashboard() {
                 <div className="h-px bg-white/10 flex-1"></div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                 {/* Calories */}
                 <div className="glass-panel p-5 sm:p-6 rounded-2xl flex flex-col justify-between group glass-panel-hover">
                     <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest font-mono mb-2">Energy Output</p>
@@ -209,21 +209,9 @@ export default function Dashboard() {
                         </div>
                     )}
                 </div>
-
-                {/* PRs */}
-                <div className="glass-panel p-5 sm:p-6 rounded-2xl flex flex-col justify-between group glass-panel-hover">
-                    <p className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest font-mono mb-2">Active PRs</p>
-                    {stats?.activePRs > 0 ? (
-                        <p className="text-3xl sm:text-4xl font-bold text-white line-clamp-1">{stats.activePRs}<span className="text-sm ml-2">🏆</span></p>
-                    ) : (
-                        <div>
-                            <p className="text-lg sm:text-xl font-bold text-gray-600">--</p>
-                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1 block">Keep Pushing</p>
-                        </div>
-                    )}
-                </div>
-
             </div>
+
+
         </motion.div>
     );
 }

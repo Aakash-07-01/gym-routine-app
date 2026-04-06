@@ -13,7 +13,7 @@ import Nutrition from './pages/Nutrition';
 import Settings from './pages/Settings';
 import Admin from './pages/Admin';
 import CustomSplitBuilder from './pages/CustomSplitBuilder';
-import VerifyOTP from './pages/VerifyOTP';
+import PRs from './pages/PRs';
 import useAuthStore from './store/authStore';
 import useGymStore from './store/gymStore';
 import { AnimatePresence } from 'framer-motion';
@@ -38,7 +38,6 @@ function App() {
       <Routes>
         <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" />} />
         <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/" />} />
-        <Route path="/verify-otp" element={!isAuthenticated ? <VerifyOTP /> : <Navigate to="/" />} />
 
         {/* Protected Routes */}
         <Route path="/" element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" />}>
@@ -51,6 +50,7 @@ function App() {
           <Route path="progress" element={<Progress />} />
           <Route path="notes" element={<Notes />} />
           <Route path="nutrition" element={<Nutrition />} />
+          <Route path="prs" element={<PRs />} />
           <Route path="settings" element={<Settings />} />
           <Route path="admin" element={<Admin />} />
         </Route>
