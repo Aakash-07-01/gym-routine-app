@@ -20,8 +20,7 @@ const useGymStore = create(
             workoutLog: [],
             youtubeCache: {},
             settings: {
-                theme: "dark",
-                youtubeApiKey: ""
+                theme: "dark"
             },
             currentWeekStart: null,
             showNewWeekSummary: null,
@@ -106,8 +105,7 @@ const useGymStore = create(
                 workoutLog: [],
                 youtubeCache: {},
                 settings: {
-                    theme: "dark",
-                    youtubeApiKey: ""
+                    theme: "dark"
                 }
             })
         }),

@@ -62,7 +62,9 @@ public class DashboardService {
                 });
 
                 // 5. Hardcode Defaults for the mockup transition
-                dto.setStreak(workoutLogRepo.findAll().size()); // naive placeholder, requires full day diff logic
+                dto.setStreak(workoutLogRepo.findAllByUserOrderByCompletedAtDesc(user).size()); // naive placeholder,
+                                                                                                // requires full day
+                                                                                                // diff logic
                 dto.setTodaysFocus(user.getPrimaryGoal() != null ? user.getPrimaryGoal() + " Focus" : "Rest");
 
                 return dto;

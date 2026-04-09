@@ -4,7 +4,7 @@ import { X, MonitorPlay as YoutubeIcon, AlertCircle } from 'lucide-react';
 import useGymStore from '../store/gymStore';
 
 export default function YoutubeModal({ exerciseName, isOpen, onClose }) {
-    const { settings, youtubeCache, cacheYoutubeResults } = useGymStore();
+    const { youtubeCache, cacheYoutubeResults } = useGymStore();
     const [videos, setVideos] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -32,9 +32,9 @@ export default function YoutubeModal({ exerciseName, isOpen, onClose }) {
                 }
             }
 
-            const apiKey = settings.youtubeApiKey;
+            const apiKey = import.meta.env.VITE_YOUTUBE_API_KEY;
             if (!apiKey) {
-                setError("YouTube API Key is missing. Please add it in Settings.");
+                setError("YouTube API Key is missing. Please add it to your .env file.");
                 setQuotaExceeded(true);
                 return;
             }
@@ -75,7 +75,7 @@ export default function YoutubeModal({ exerciseName, isOpen, onClose }) {
         };
 
         fetchVideos();
-    }, [isOpen, exerciseName, settings.youtubeApiKey, youtubeCache, cacheYoutubeResults]);
+    }, [isOpen, exerciseName, youtubeCache, cacheYoutubeResults]);
 
     if (!isOpen) return null;
 
@@ -169,8 +169,8 @@ export default function YoutubeModal({ exerciseName, isOpen, onClose }) {
                                             key={video.videoId}
                                             onClick={() => setSelectedVideoId(video.videoId)}
                                             className={`flex flex-col sm:flex-row gap-3 p-2 rounded-xl text-left transition-all border shrink-0 w-64 lg:w-auto snap-center ${selectedVideoId === video.videoId
-                                                    ? 'bg-gym-surface border-gym-primary shadow-[0_0_10px_rgba(200,255,0,0.1)]'
-                                                    : 'bg-transparent border-transparent hover:bg-gym-surface'
+                                                ? 'bg-gym-surface border-gym-primary shadow-[0_0_10px_rgba(200,255,0,0.1)]'
+                                                : 'bg-transparent border-transparent hover:bg-gym-surface'
                                                 }`}
                                         >
                                             <img
