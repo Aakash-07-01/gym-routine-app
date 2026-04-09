@@ -83,8 +83,7 @@ export default function MainLayout() {
                             key={item.to}
                             to={item.to}
                             className={({ isActive }) =>
-                                `relative group flex flex-col items-center justify-center p-2 sm:p-3 md:p-4 rounded-xl transition-all duration-300 ease-out flex-shrink-0 ${isActive ? 'bg-white/10 text-white transform -translate-y-2 md:-translate-y-3 shadow-[0_10px_20px_rgba(0,122,255,0.2)] border border-white/10 outline outline-1 outline-gym-blue/30' : 'text-gray-400 hover:text-white hover:bg-white/5 hover:-translate-y-2'
-                                }`
+                                `relative group flex flex-col items-center justify-center p-2 sm:p-3 md:p-4 rounded-xl transition-all duration-300 ease-out flex-shrink-0 ${isActive ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(0,122,255,0.15)] border border-white/10' : 'text-gray-400 hover:text-white hover:bg-white/5'}`
                             }
                         >
                             {({ isActive }) => (
@@ -103,14 +102,14 @@ export default function MainLayout() {
                     <div className="md:hidden w-px h-8 bg-white/10 mx-0.5"></div>
                     <button
                         onClick={() => navigate('/settings')}
-                        className="md:hidden relative group p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 hover:-translate-y-2 flex-shrink-0"
+                        className="md:hidden relative group p-2 sm:p-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-300 flex-shrink-0"
                     >
                         <Settings size={22} />
                         <span className="absolute -top-12 scale-0 group-hover:scale-100 transition-transform origin-bottom bg-[#1a1a1a]/95 text-white text-xs px-3 py-1.5 rounded-md shadow-xl border border-white/10">Settings</span>
                     </button>
                     <button
                         onClick={handleLogout}
-                        className="md:hidden relative group p-2 sm:p-3 text-gray-400 hover:text-gym-red hover:bg-white/5 rounded-xl transition-all duration-300 hover:-translate-y-2 flex-shrink-0"
+                        className="md:hidden relative group p-2 sm:p-3 text-gray-400 hover:text-gym-red hover:bg-white/5 rounded-xl transition-all duration-300 flex-shrink-0"
                     >
                         <LogOut size={22} />
                         <span className="absolute -top-12 scale-0 group-hover:scale-100 transition-transform origin-bottom bg-[#1a1a1a]/95 text-gym-red text-xs px-3 py-1.5 rounded-md shadow-xl border border-gym-red/30">Logout</span>

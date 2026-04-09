@@ -4,7 +4,7 @@ import { X, MonitorPlay as YoutubeIcon, AlertCircle } from 'lucide-react';
 import useGymStore from '../store/gymStore';
 
 export default function YoutubeModal({ exerciseName, isOpen, onClose }) {
-    const { youtubeCache, cacheYoutubeResults } = useGymStore();
+    const { settings, youtubeCache, cacheYoutubeResults } = useGymStore();
     const [videos, setVideos] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -32,9 +32,9 @@ export default function YoutubeModal({ exerciseName, isOpen, onClose }) {
                 }
             }
 
-            const apiKey = import.meta.env.VITE_YOUTUBE_API_KEY;
+            const apiKey = import.meta.env.VITE_YOUTUBE_API_KEY || settings?.youtubeApiKey;
             if (!apiKey) {
-                setError("YouTube API Key is missing. Please add it to your .env file.");
+                setError("YouTube API Key is missing. Please add it in Settings.");
                 setQuotaExceeded(true);
                 return;
             }
@@ -75,7 +75,7 @@ export default function YoutubeModal({ exerciseName, isOpen, onClose }) {
         };
 
         fetchVideos();
-    }, [isOpen, exerciseName, youtubeCache, cacheYoutubeResults]);
+    }, [isOpen, exerciseName, settings?.youtubeApiKey, youtubeCache, cacheYoutubeResults]);
 
     if (!isOpen) return null;
 
