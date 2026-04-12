@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MonitorPlay as YoutubeIcon, AlertCircle } from 'lucide-react';
 import useGymStore from '../store/gymStore';
+import useAuthStore from '../store/authStore';
 
 export default function YoutubeModal({ exerciseName, isOpen, onClose }) {
-    const { settings, youtubeCache, cacheYoutubeResults } = useGymStore();
+    const { youtubeCache, cacheYoutubeResults } = useGymStore();
+    const token = useAuthStore(state => state.token);
     const [videos, setVideos] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedVideoId, setSelectedVideoId] = useState(null);
-    const [quotaExceeded, setQuotaExceeded] = useState(false);
 
     useEffect(() => {
         if (!isOpen || !exerciseName) {
@@ -32,50 +33,36 @@ export default function YoutubeModal({ exerciseName, isOpen, onClose }) {
                 }
             }
 
-            const apiKey = import.meta.env.VITE_YOUTUBE_API_KEY || settings?.youtubeApiKey;
-            if (!apiKey) {
-                setError("YouTube API Key is missing. Please add it in Settings.");
-                setQuotaExceeded(true);
-                return;
-            }
-
             setLoading(true);
             setError(null);
-            setQuotaExceeded(false);
 
             try {
-                const query = encodeURIComponent(`${exerciseName} proper form tutorial`);
-                const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&q=${query}&type=video&key=${apiKey}`);
-                const data = await response.json();
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+                const query = encodeURIComponent(exerciseName);
+                const response = await fetch(`${apiUrl}/api/youtube/search?q=${query}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-                if (response.ok && data.items) {
-                    const fetchedVideos = data.items.map(item => ({
-                        videoId: item.id.videoId,
-                        title: item.snippet.title,
-                        thumbnail: item.snippet.thumbnails.high.url,
-                        channel: item.snippet.channelTitle,
-                    }));
-
+                if (response.ok) {
+                    const fetchedVideos = await response.json();
                     setVideos(fetchedVideos);
                     if (fetchedVideos.length > 0) setSelectedVideoId(fetchedVideos[0].videoId);
                     cacheYoutubeResults(exerciseName, fetchedVideos);
-                } else if (data.error && data.error.errors && data.error.errors.length > 0 && data.error.errors[0].reason === 'quotaExceeded') {
-                    setQuotaExceeded(true);
-                    setError("API Quota Exceeded. You can click below to search on YouTube instead.");
+                } else if (response.status === 503) {
+                    setError("YouTube API key is not configured on the server. Contact the admin.");
                 } else {
-                    setError(data.error?.message || "Failed to fetch videos. Check your API Key.");
-                    setQuotaExceeded(true);
+                    const data = await response.json().catch(() => ({}));
+                    setError(data.message || "Failed to fetch videos.");
                 }
             } catch (err) {
                 setError("Network error fetching videos.");
-                setQuotaExceeded(true);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchVideos();
-    }, [isOpen, exerciseName, settings?.youtubeApiKey, youtubeCache, cacheYoutubeResults]);
+    }, [isOpen, exerciseName, youtubeCache, cacheYoutubeResults, token]);
 
     if (!isOpen) return null;
 
@@ -116,7 +103,7 @@ export default function YoutubeModal({ exerciseName, isOpen, onClose }) {
                             </div>
                         )}
 
-                        {!loading && error && quotaExceeded && (
+                        {!loading && error && (
                             <div className="flex flex-col items-center justify-center py-16 text-center space-y-4">
                                 <AlertCircle className="text-gym-accent" size={64} />
                                 <p className="text-gray-300 max-w-md text-lg">{error}</p>
@@ -188,7 +175,7 @@ export default function YoutubeModal({ exerciseName, isOpen, onClose }) {
                             </div>
                         )}
 
-                        {!loading && !error && videos.length === 0 && !quotaExceeded && (
+                        {!loading && !error && videos.length === 0 && (
                             <div className="text-center text-gray-500 py-10">
                                 No tutorials found.
                             </div>

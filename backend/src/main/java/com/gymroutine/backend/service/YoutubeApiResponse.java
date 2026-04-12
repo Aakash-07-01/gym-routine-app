@@ -48,6 +48,8 @@ public class YoutubeApiResponse {
 
     public static class Snippet {
         private String title;
+        private String channelTitle;
+        private Thumbnails thumbnails;
 
         public String getTitle() {
             return title;
@@ -55,6 +57,46 @@ public class YoutubeApiResponse {
 
         public void setTitle(String title) {
             this.title = title;
+        }
+
+        public String getChannelTitle() {
+            return channelTitle;
+        }
+
+        public void setChannelTitle(String channelTitle) {
+            this.channelTitle = channelTitle;
+        }
+
+        public Thumbnails getThumbnails() {
+            return thumbnails;
+        }
+
+        public void setThumbnails(Thumbnails thumbnails) {
+            this.thumbnails = thumbnails;
+        }
+    }
+
+    public static class Thumbnails {
+        private ThumbnailInfo high;
+
+        public ThumbnailInfo getHigh() {
+            return high;
+        }
+
+        public void setHigh(ThumbnailInfo high) {
+            this.high = high;
+        }
+    }
+
+    public static class ThumbnailInfo {
+        private String url;
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
         }
     }
 }

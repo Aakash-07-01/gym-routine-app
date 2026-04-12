@@ -143,7 +143,7 @@ export default function Settings() {
                 </div>
             </div>
 
-            {/* Appearance & API */}
+            {/* Appearance */}
             <div className="bg-gym-gray border border-gym-light p-6 rounded-xl">
                 <div className="flex items-center gap-3 mb-4">
                     <Moon className="text-gym-blue" size={24} />
@@ -153,17 +153,7 @@ export default function Settings() {
                     <span className="text-white">Dark Mode</span>
                     <span className="bg-gym-blue text-white px-3 py-1 rounded-full text-xs cursor-default">Enabled natively</span>
                 </div>
-                <div>
-                    <label className="block text-gray-400 text-sm mb-1">YouTube API Key</label>
-                    <input
-                        type="password"
-                        value={settings?.youtubeApiKey || ''}
-                        onChange={(e) => updateSettings({ youtubeApiKey: e.target.value })}
-                        className="w-full bg-gym-dark border border-gym-light rounded-lg px-4 py-2.5 text-white outline-none focus:border-gym-primary transition-colors"
-                        placeholder={settings?.youtubeApiKey ? "API Key is securely configured" : "Paste your Google API Key here..."}
-                    />
-                    <p className="text-xs text-gray-500 mt-2">Required for tutorials. You can configure in your .env file, or securely set it here.</p>
-                </div>
+                <p className="text-xs text-gray-500 mt-2">YouTube tutorials are powered by a server-side API key. No configuration needed here.</p>
             </div>
 
             {/* Danger Zone */}

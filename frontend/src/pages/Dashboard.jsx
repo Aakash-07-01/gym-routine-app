@@ -11,6 +11,7 @@ export default function Dashboard() {
 
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [backendError, setBackendError] = useState(false);
 
     // Weekly Report
     const [weeklyReport, setWeeklyReport] = useState(null);
@@ -49,6 +50,7 @@ export default function Dashboard() {
 
     const fetchDashboardStats = async () => {
         try {
+            setBackendError(false);
             const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/dashboard`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -61,7 +63,7 @@ export default function Dashboard() {
                 setShowMetricsPrompt(true);
             }
         } catch (err) {
-            toast.error("Could not load backend metrics.");
+            setBackendError(true);
         } finally {
             setLoading(false);
         }
@@ -77,6 +79,20 @@ export default function Dashboard() {
 
     return (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="pb-12">
+
+            {/* Backend Error State */}
+            {backendError && (
+                <div className="glass-panel p-8 mb-8 text-center border border-red-900/30">
+                    <p className="text-gray-300 mb-2">Could not connect to the backend server.</p>
+                    <p className="text-gray-500 text-sm mb-4">The server might be starting up. Please try again.</p>
+                    <button
+                        onClick={() => { setLoading(true); fetchDashboardStats(); }}
+                        className="bg-gym-blue hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-lg transition-all"
+                    >
+                        Retry
+                    </button>
+                </div>
+            )}
 
             {/* Weekly Summary Modal */}
             <AnimatePresence>
