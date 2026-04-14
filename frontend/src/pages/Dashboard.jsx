@@ -43,6 +43,8 @@ export default function Dashboard() {
                     setWeeklyReport(await res.json());
                     setShowWeeklyModal(true);
                     localStorage.setItem('gymjam_weekly_seen', todayStr);
+                } else if (res.status === 401 || res.status === 403) {
+                    logout();
                 }
             } catch (e) { }
         }
@@ -54,7 +56,13 @@ export default function Dashboard() {
             const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/dashboard`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (!res.ok) throw new Error('Failed to fetch dashboard metrics');
+            if (!res.ok) {
+                if (res.status === 401 || res.status === 403) {
+                    logout();
+                    return;
+                }
+                throw new Error('Failed to fetch dashboard metrics');
+            }
             const json = await res.json();
             setStats(json);
 
