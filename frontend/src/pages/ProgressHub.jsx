@@ -395,7 +395,7 @@ function CalendarTab() {
 
 function AnalyticsTab() {
 
-    const { token } = useAuthStore();
+    const { token, user } = useAuthStore();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -616,7 +616,7 @@ function AnalyticsTab() {
                                     volumeThresholds={volumeThresholds}
                                     muscleColors={heatmapMode === 'strength' ? muscleColors : undefined}
                                     onPartHover={handlePartHover}
-                                    gender="male"
+                                    gender={user?.biologicalSex === 'Female' ? 'female' : 'male'}
                                     variant="original"
                                 />
                             </div>
