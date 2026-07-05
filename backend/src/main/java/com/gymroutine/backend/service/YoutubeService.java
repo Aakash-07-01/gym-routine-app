@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 
 @Service
 public class YoutubeService {
@@ -37,7 +38,13 @@ public class YoutubeService {
         try {
             String url = "https://www.youtube.com/results?search_query="
                     + URLEncoder.encode(query + " tutorial", StandardCharsets.UTF_8);
-            String html = WebClient.create().get().uri(url)
+
+            ExchangeStrategies strategies = ExchangeStrategies.builder()
+                    .codecs(configurer -> configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024))
+                    .build();
+            WebClient scraperClient = WebClient.builder().exchangeStrategies(strategies).build();
+
+            String html = scraperClient.get().uri(url)
                     .header("User-Agent",
                             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
                     .header("Accept-Language", "en-US,en;q=0.9")

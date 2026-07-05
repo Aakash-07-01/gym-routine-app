@@ -35,7 +35,9 @@ public class WorkoutLog {
 
     @PrePersist
     protected void onComplete() {
-        completedAt = LocalDateTime.now();
+        if (completedAt == null) {
+            completedAt = LocalDateTime.now();
+        }
     }
 
     public WorkoutLog() {

@@ -10,4 +10,8 @@ import java.util.List;
 @Repository
 public interface ExerciseSessionRepository extends JpaRepository<ExerciseSession, Long> {
     List<ExerciseSession> findAllByUserAndExerciseNameOrderByCompletedAtDesc(User user, String exerciseName);
+    
+    List<ExerciseSession> findAllByUserOrderByCompletedAtAsc(User user);
+
+    List<ExerciseSession> findAllByWorkoutLog(com.gymroutine.backend.model.WorkoutLog workoutLog);
 }

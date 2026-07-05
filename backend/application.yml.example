@@ -1,0 +1,1 @@
+application.security.jwt.secret-key: YOUR_256BIT_SECRET_HERE

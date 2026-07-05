@@ -13,7 +13,7 @@ spring:
       enabled: true
       path: /h2-console
       settings:
-        web-allow-others: true
+        web-allow-others: false
   jpa:
     database-platform: ${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.H2Dialect}
     hibernate:
@@ -51,9 +51,19 @@ server:
 application:
   security:
     jwt:
-      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      secret-key: ${JWT_SECRET_KEY}
       expiration: 86400000
 
 youtube:
   api:
     key: ${YOUTUBE_API_KEY:}
+
+ai:
+  groq:
+    api-key: ${AI_GROQ_API_KEY:}
+  gemini:
+    api-key: ${AI_GEMINI_API_KEY:}
+  mistral:
+    api-key: ${AI_MISTRAL_API_KEY:}
+  huggingface:
+    api-key: ${AI_HUGGINGFACE_API_KEY:}

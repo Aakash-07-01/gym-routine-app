@@ -11,10 +11,7 @@ export default function Nutrition() {
 
     const [formOpen, setFormOpen] = useState(false);
     const [mealName, setMealName] = useState('');
-    const [calories, setCalories] = useState('');
-    const [protein, setProtein] = useState('');
-    const [carbs, setCarbs] = useState('');
-    const [fats, setFats] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         fetchTodayLogs();
@@ -35,6 +32,7 @@ export default function Nutrition() {
 
     const handleSave = async (e) => {
         e.preventDefault();
+        setIsSaving(true);
         try {
             const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/nutrition`, {
                 method: 'POST',
@@ -43,28 +41,32 @@ export default function Nutrition() {
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    mealName,
-                    calories: Number(calories),
-                    proteinGrams: Number(protein || 0),
-                    carbsGrams: Number(carbs || 0),
-                    fatGrams: Number(fats || 0)
+                    mealName
                 })
             });
             if (res.ok) {
-                toast.success("Meal Logged!", { icon: '🥑' });
+                toast.success("Meal Logged & Macros Estimated!", { icon: '🥑' });
                 setFormOpen(false);
-                setMealName(''); setCalories(''); setProtein(''); setCarbs(''); setFats('');
+                setMealName('');
                 fetchTodayLogs();
+            } else {
+                if (res.status === 401 || res.status === 403) {
+                    toast.error("Session expired. Please log out and sign up/log in again.");
+                } else {
+                    toast.error("Failed to log meal. Please try again.");
+                }
             }
         } catch (err) {
             toast.error("Failed to log meal");
+        } finally {
+            setIsSaving(false);
         }
     };
 
     const totalCals = logs.reduce((acc, l) => acc + (l.calories || 0), 0);
-    const totalPro = logs.reduce((acc, l) => acc + (l.proteinGrams || 0), 0);
-    const totalCarb = logs.reduce((acc, l) => acc + (l.carbsGrams || 0), 0);
-    const totalFat = logs.reduce((acc, l) => acc + (l.fatGrams || 0), 0);
+    const totalPro = logs.reduce((acc, l) => acc + (l.proteinGram || 0), 0);
+    const totalCarb = logs.reduce((acc, l) => acc + (l.carbsGram || 0), 0);
+    const totalFat = logs.reduce((acc, l) => acc + (l.fatGram || 0), 0);
 
     // Naive goals based on user primary goal
     let calGoal = 2500;
@@ -92,28 +94,13 @@ export default function Nutrition() {
                             <form onSubmit={handleSave} className="space-y-4">
                                 <div>
                                     <label className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1 block">Meal Name/Description</label>
-                                    <input type="text" required placeholder="e.g. Chicken & Rice" className="w-full bg-[#1a1a1a] border-2 border-[#333] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00e5ff] font-mono" value={mealName} onChange={e => setMealName(e.target.value)} />
-                                </div>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div>
-                                        <label className="text-xs text-[#C8FF00] font-bold uppercase tracking-widest mb-1 block">Calories</label>
-                                        <input type="number" required placeholder="kcal" className="w-full bg-[#1a1a1a] border-2 border-[#333] rounded-xl px-4 py-3 text-[#C8FF00] focus:outline-none focus:border-[#00e5ff] font-bebas text-2xl tracking-widest" value={calories} onChange={e => setCalories(e.target.value)} />
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-[#00E5FF] font-bold uppercase tracking-widest mb-1 block">Protein (g)</label>
-                                        <input type="number" placeholder="g" className="w-full bg-[#1a1a1a] border-2 border-[#333] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00e5ff] font-mono" value={protein} onChange={e => setProtein(e.target.value)} />
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-[#FF0055] font-bold uppercase tracking-widest mb-1 block">Carbs (g)</label>
-                                        <input type="number" placeholder="g" className="w-full bg-[#1a1a1a] border-2 border-[#333] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00e5ff] font-mono" value={carbs} onChange={e => setCarbs(e.target.value)} />
-                                    </div>
-                                    <div>
-                                        <label className="text-xs text-orange-400 font-bold uppercase tracking-widest mb-1 block">Fats (g)</label>
-                                        <input type="number" placeholder="g" className="w-full bg-[#1a1a1a] border-2 border-[#333] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00e5ff] font-mono" value={fats} onChange={e => setFats(e.target.value)} />
-                                    </div>
+                                    <input type="text" required placeholder="e.g. Chicken & Rice or 2 slices of pizza" className="w-full bg-[#1a1a1a] border-2 border-[#333] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00e5ff] font-mono" value={mealName} onChange={e => setMealName(e.target.value)} disabled={isSaving} />
+                                    <p className="text-xs text-gray-500 mt-2 font-mono">Our AI will automatically estimate macros based on your description.</p>
                                 </div>
                                 <div className="pt-4">
-                                    <button type="submit" className="w-full btn-3d-lime text-black font-bebas text-2xl tracking-widest py-3 rounded-xl uppercase transition-transform">ADD TO DAILY LOG</button>
+                                    <button type="submit" disabled={isSaving} className="w-full btn-3d-lime text-black font-bebas text-2xl tracking-widest py-3 rounded-xl uppercase transition-transform disabled:opacity-50">
+                                        {isSaving ? 'Estimating Macros...' : 'ADD TO DAILY LOG'}
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -168,12 +155,12 @@ export default function Nutrition() {
                         <div key={log.id} className="card-3d-item bg-[#1a1a1a] p-5 border-[#333] flex justify-between items-center rounded-xl hover:border-[#00E5FF]/50 transition-colors">
                             <div>
                                 <h3 className="text-xl font-bebas uppercase text-white tracking-widest">{log.mealName}</h3>
-                                <p className="text-xs font-mono text-gray-500 mt-1">{new Date(log.dateLogged).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                <p className="text-xs font-mono text-gray-500 mt-1">{new Date(log.logDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                             </div>
                             <div className="flex items-center gap-6">
                                 <div className="text-center">
                                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">PRO</p>
-                                    <p className="text-sm font-mono text-[#00E5FF]">{log.proteinGrams || 0}</p>
+                                    <p className="text-sm font-mono text-[#00E5FF]">{log.proteinGram || 0}</p>
                                 </div>
                                 <div className="text-center">
                                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">KCAL</p>

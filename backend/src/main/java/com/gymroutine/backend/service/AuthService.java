@@ -74,11 +74,12 @@ public class AuthService {
 
         public AuthResponse authenticate(AuthRequest request) {
                 var user = repository.findByUsernameIgnoreCase(request.getUsername())
-                                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
+                                .orElseGet(() -> repository.findByEmailIgnoreCase(request.getUsername())
+                                .orElseThrow(() -> new RuntimeException("Invalid username or password")));
 
                 authenticationManager.authenticate(
                                 new UsernamePasswordAuthenticationToken(
-                                                request.getUsername(),
+                                                user.getUsername(),
                                                 request.getPassword()));
                 var jwtToken = jwtService.generateToken(user);
                 return AuthResponse.builder()

@@ -275,7 +275,7 @@ export default function Routine() {
         setExercises(items => items.map(ex => {
             if (ex.id !== exerciseId) return ex;
             const newLogs = [...ex.setLogs];
-            newLogs[setIndex].completed = !newLogs[setIndex].completed;
+            newLogs[setIndex] = { ...newLogs[setIndex], completed: !newLogs[setIndex].completed };
             return { ...ex, setLogs: newLogs };
         }));
     };
@@ -284,7 +284,7 @@ export default function Routine() {
         setExercises(items => items.map(ex => {
             if (ex.id !== exerciseId) return ex;
             const newLogs = [...ex.setLogs];
-            newLogs[setIndex][field] = value;
+            newLogs[setIndex] = { ...newLogs[setIndex], [field]: value };
             return { ...ex, setLogs: newLogs };
         }));
     };

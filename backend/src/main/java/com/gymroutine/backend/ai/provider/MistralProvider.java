@@ -1,0 +1,145 @@
+package com.gymroutine.backend.ai.provider;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gymroutine.backend.ai.AiProviderException;
+import com.gymroutine.backend.ai.agent.AiAgentResponse;
+import com.gymroutine.backend.ai.circuit.CircuitBreakerRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class MistralProvider implements AiProvider {
+
+    private static final Logger log = LoggerFactory.getLogger(MistralProvider.class);
+    private static final String PROVIDER_NAME = "MISTRAL";
+    private static final String BASE_URL = "https://api.mistral.ai/v1";
+    private static final String MODEL = "mistral-small-latest";
+
+    @Value("${ai.mistral.api-key:}")
+    private String apiKey;
+
+    private final CircuitBreakerRegistry circuitBreakerRegistry;
+    private final WebClient webClient;
+    private final ObjectMapper objectMapper;
+
+    public MistralProvider(CircuitBreakerRegistry circuitBreakerRegistry, WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
+        this.circuitBreakerRegistry = circuitBreakerRegistry;
+        this.webClient = webClientBuilder.baseUrl(BASE_URL).build();
+        this.objectMapper = objectMapper;
+    }
+
+    @Override
+    public String getProviderName() {
+        return PROVIDER_NAME;
+    }
+
+    @Override
+    public int getPriority() {
+        return 3;
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return apiKey != null && !apiKey.isBlank() && !circuitBreakerRegistry.isOpen(PROVIDER_NAME);
+    }
+
+    @Override
+    public AiAgentResponse complete(String systemPrompt, String userPrompt) {
+        if (!isAvailable()) {
+            throw new AiProviderException("Mistral provider is not available");
+        }
+
+        long startTime = System.currentTimeMillis();
+        
+        Map<String, Object> requestBody = Map.of(
+            "model", MODEL,
+            "messages", List.of(
+                Map.of("role", "system", "content", systemPrompt),
+                Map.of("role", "user", "content", userPrompt)
+            )
+        );
+
+        try {
+            JsonNode responseNode = webClient.post()
+                    .uri("/chat/completions")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(JsonNode.class)
+                    .block();
+
+            String content = responseNode.path("choices").get(0).path("message").path("content").asText();
+            int promptTokens = responseNode.path("usage").path("prompt_tokens").asInt(0);
+            int completionTokens = responseNode.path("usage").path("completion_tokens").asInt(0);
+
+            circuitBreakerRegistry.recordSuccess(PROVIDER_NAME);
+
+            return AiAgentResponse.builder()
+                    .content(content)
+                    .providerUsed(PROVIDER_NAME)
+                    .modelUsed(MODEL)
+                    .tokensUsed(promptTokens + completionTokens)
+                    .latencyMs(System.currentTimeMillis() - startTime)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Mistral API error", e);
+            circuitBreakerRegistry.recordFailure(PROVIDER_NAME);
+            throw new AiProviderException("Failed to call Mistral API", e);
+        }
+    }
+
+    @Override
+    public Flux<String> stream(String systemPrompt, String userPrompt) {
+        if (!isAvailable()) {
+            return Flux.error(new AiProviderException("Mistral provider is not available"));
+        }
+
+        Map<String, Object> requestBody = Map.of(
+            "model", MODEL,
+            "messages", List.of(
+                Map.of("role", "system", "content", systemPrompt),
+                Map.of("role", "user", "content", userPrompt)
+            ),
+            "stream", true
+        );
+
+        return webClient.post()
+                .uri("/chat/completions")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .retrieve()
+                .bodyToFlux(String.class)
+                .filter(chunk -> !chunk.equals("[DONE]"))
+                .mapNotNull(chunk -> {
+                    try {
+                        JsonNode node = objectMapper.readTree(chunk);
+                        JsonNode delta = node.path("choices").get(0).path("delta");
+                        if (delta.has("content")) {
+                            return delta.get("content").asText();
+                        }
+                    } catch (Exception e) {
+                        // ignore parsing errors for partial chunks
+                    }
+                    return null;
+                })
+                .doOnComplete(() -> circuitBreakerRegistry.recordSuccess(PROVIDER_NAME))
+                .onErrorResume(e -> {
+                    log.error("Mistral stream error", e);
+                    circuitBreakerRegistry.recordFailure(PROVIDER_NAME);
+                    return Flux.error(new AiProviderException("Failed to stream from Mistral API", e));
+                });
+    }
+}

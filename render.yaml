@@ -1,0 +1,66 @@
+version: "1"
+
+services:
+  - type: web
+    name: gym-routine-backend
+    env: docker
+    rootDir: backend
+    dockerfilePath: Dockerfile
+    plan: free
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: DB_HOST
+        fromDatabase:
+          name: gym-routine-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: gym-routine-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: gym-routine-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: gym-routine-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: gym-routine-db
+          property: password
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: AI_GROQ_API_KEY
+        sync: false
+      - key: AI_GEMINI_API_KEY
+        sync: false
+      - key: AI_MISTRAL_API_KEY
+        sync: false
+      - key: AI_HUGGINGFACE_API_KEY
+        sync: false
+      - key: SPRING_MAIL_USERNAME
+        sync: false
+      - key: SPRING_MAIL_PASSWORD
+        sync: false
+
+  - type: static
+    name: gym-routine-frontend
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: gym-routine-backend
+          envVarKey: RENDER_EXTERNAL_URL
+
+databases:
+  - name: gym-routine-db
+    databaseName: gymroutine
+    user: gymuser
+    plan: free

@@ -35,8 +35,20 @@ const useAuthStore = create((set) => ({
             }
 
             localStorage.setItem('token', data.token);
-            // Decode simple user from token or just stash name
-            const user = { username: credentials.username };
+
+            let user = { username: credentials.username };
+            try {
+                // Fetch full profile info for metric systems and biometric calculations
+                const profileRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/users/profile`, {
+                    headers: { 'Authorization': `Bearer ${data.token}` }
+                });
+                if (profileRes.ok) {
+                    user = await profileRes.json();
+                }
+            } catch (e) {
+                console.warn("Could not fetch full user profile on login", e);
+            }
+
             localStorage.setItem('gym_user', JSON.stringify(user));
 
             set({ user, token: data.token, isAuthenticated: true });

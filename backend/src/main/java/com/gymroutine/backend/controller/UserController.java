@@ -17,6 +17,13 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping
+    public ResponseEntity<User> getProfile(Authentication authentication) {
+        String username = authentication.getName();
+        User user = userService.getProfile(username);
+        return ResponseEntity.ok(user);
+    }
+
     @PatchMapping
     public ResponseEntity<User> updateProfile(Authentication authentication,
             @RequestBody UpdateProfileRequest request) {

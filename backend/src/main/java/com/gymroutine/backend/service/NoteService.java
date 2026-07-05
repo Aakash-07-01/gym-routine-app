@@ -3,6 +3,7 @@ package com.gymroutine.backend.service;
 import com.gymroutine.backend.model.DailyNote;
 import com.gymroutine.backend.model.User;
 import com.gymroutine.backend.repository.DailyNoteRepository;
+import com.gymroutine.backend.ai.agent.AiAgentOrchestrator;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -11,9 +12,11 @@ import java.util.List;
 @Service
 public class NoteService {
     private final DailyNoteRepository repo;
+    private final AiAgentOrchestrator aiAgentOrchestrator;
 
-    public NoteService(DailyNoteRepository repo) {
+    public NoteService(DailyNoteRepository repo, AiAgentOrchestrator aiAgentOrchestrator) {
         this.repo = repo;
+        this.aiAgentOrchestrator = aiAgentOrchestrator;
     }
 
     public DailyNote saveNote(User user, DailyNote note) {
@@ -26,21 +29,19 @@ public class NoteService {
             note.setEnergyLevel(3);
         }
 
-        // Mock AI Insight Generation
-        String text = note.getContent() != null ? note.getContent().toLowerCase() : "";
+        // Real AI Insight Generation
+        String text = note.getContent() != null ? note.getContent() : "";
         String generatedInsight = "Consistency is key. Great job logging your thoughts.";
-
-        if (text.contains("tired") || text.contains("exhausted") || text.contains("fatigue")
-                || note.getEnergyLevel() <= 2) {
-            generatedInsight = "AI Insight: High fatigue detected. Consider taking a rest day or prioritizing hydration and deep sleep tonight.";
-        } else if (text.contains("strong") || text.contains("pr") || text.contains("easy")
-                || note.getEnergyLevel() >= 4) {
-            generatedInsight = "AI Insight: You are peaking! Your energy is high. Tomorrow is a great day to attempt a new Personal Record.";
-        } else if (text.contains("sore") || text.contains("pain") || text.contains("hurt")) {
-            generatedInsight = "AI Insight: Muscle soreness detected. Ensure you are hitting your protein targets and consider light active recovery (e.g., walking) instead of heavy lifting.";
-        } else if (text.contains("hungry") || text.contains("starving")) {
-            generatedInsight = "AI Insight: Appetite signals indicate potential caloric deficit. Check if this aligns with your goal: "
-                    + user.getPrimaryGoal() + ".";
+        
+        if (!text.trim().isEmpty()) {
+            try {
+                generatedInsight = aiAgentOrchestrator.generateNoteInsight(text);
+                // Prefix with AI Insight to maintain UI style if needed, 
+                // but the prompt says we shouldn't use if-else.
+                // Let's just use the raw response.
+            } catch (Exception e) {
+                generatedInsight = "AI Insight unavailable at the moment. Keep up the good work!";
+            }
         }
 
         note.setAiInsight(generatedInsight);

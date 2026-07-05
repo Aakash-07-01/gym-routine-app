@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/gym_routine
+    username: gym_user
+    password: gym_password
+
+application:
+  security:
+    jwt:
+      secret-key: YOUR_SECURE_JWT_SECRET_KEY
+
+youtube:
+  api:
+    key: YOUR_YOUTUBE_API_KEY
+
+ai:
+  groq:
+    api-key: YOUR_GROQ_API_KEY
+  gemini:
+    api-key: YOUR_GEMINI_API_KEY
+  mistral:
+    api-key: YOUR_MISTRAL_API_KEY
+  huggingface:
+    api-key: YOUR_HUGGINGFACE_API_KEY

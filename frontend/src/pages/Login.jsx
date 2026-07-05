@@ -19,7 +19,7 @@ export default function Login() {
         try {
             const result = await login({ username, password });
             if (result.success) {
-                toast.success('System Connected. Welcome back.', { icon: '⚡' });
+                toast.success('Logged in. Welcome back.', { icon: '⚡' });
                 navigate('/');
             } else {
                 toast.error(result.error);
@@ -34,7 +34,7 @@ export default function Login() {
             <div className="max-w-md w-full relative">
 
                 <h1 className="text-6xl font-bebas text-center text-[#C8FF00] tracking-widest mb-2 drop-shadow-[0_0_15px_rgba(200,255,0,0.4)]">
-                    SYS-LOGIN
+                    LOGIN
                 </h1>
                 <p className="text-gray-400 font-mono text-center mb-10 text-sm tracking-widest uppercase">
                     Authentication Required.
@@ -73,14 +73,14 @@ export default function Login() {
                                 disabled={isLoading}
                                 className="w-full bg-[#C8FF00] hover:bg-[#a6d100] text-black font-bebas text-3xl tracking-widest py-4 rounded-xl transition-transform hover:scale-[1.02] disabled:opacity-50 shadow-[0_0_15px_rgba(200,255,0,0.3)] shadow-[#C8FF00]"
                             >
-                                {isLoading ? 'AUTHENTICATING...' : 'ACCESS SYSTEM'}
+                                {isLoading ? 'AUTHENTICATING...' : 'LOGIN'}
                             </button>
                         </div>
                     </form>
 
                     <div className="mt-8 text-center pt-6 border-t-2 border-[#222]">
                         <p className="text-gray-500 font-mono text-sm tracking-wide">
-                            Unregistered? <Link to="/register" className="text-[#00e5ff] hover:text-white transition-colors uppercase">Initiate Setup</Link>
+                            Unregistered? <Link to="/register" className="text-[#00e5ff] hover:text-white transition-colors uppercase">Register</Link>
                         </p>
                     </div>
                 </div>

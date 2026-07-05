@@ -1,7 +1,8 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { Home, Calendar, LayoutList, History, Settings, LogOut, Dumbbell, Shield, Trophy } from 'lucide-react';
+import { Home, Dumbbell, BarChart2, FileText, Utensils, Settings, LogOut, Shield, Bot, Send, X, ChevronDown } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import { useState, useEffect } from 'react';
+import AIChatBot from '../AIChatBot';
 
 export default function MainLayout() {
     const logout = useAuthStore(state => state.logout);
@@ -20,16 +21,12 @@ export default function MainLayout() {
     };
 
     const navItems = [
-        { to: '/', icon: Home, label: 'Dashboard' },
-        { to: '/routine', icon: Calendar, label: 'Routine' },
-        { to: '/templates', icon: LayoutList, label: 'Library' },
-        { to: '/history', icon: History, label: 'History' },
-        { to: '/prs', icon: Trophy, label: 'PRs' },
+        { to: '/',          icon: Home,        label: 'Dashboard' },
+        { to: '/training',  icon: Dumbbell,    label: 'Training'  },
+        { to: '/progress',  icon: BarChart2,   label: 'Progress'  },
+        { to: '/notes',     icon: FileText,    label: 'Notes'     },
+        { to: '/nutrition', icon: Utensils,    label: 'Nutrition' },
     ];
-
-    if (user?.username === 'admin') {
-        navItems.push({ to: '/admin', icon: Shield, label: 'Admin' });
-    }
 
     return (
         <div className="relative min-h-screen bg-gym-dark overflow-hidden flex flex-col font-inter">
@@ -116,6 +113,8 @@ export default function MainLayout() {
                     </button>
                 </nav>
             </div>
+            
+            <AIChatBot />
         </div>
     );
 }

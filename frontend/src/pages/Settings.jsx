@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { User, Trash2, Moon, Save } from 'lucide-react';
+import { User, Trash2, Moon, Save, Shield, ShieldAlert, ChevronDown, ChevronUp } from 'lucide-react';
+import Admin from './Admin';
 import useGymStore from '../store/gymStore';
 import useAuthStore from '../store/authStore';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +10,8 @@ export default function Settings() {
     const { resetData, settings, updateSettings } = useGymStore();
     const { user, token, logout, updateUser } = useAuthStore();
     const navigate = useNavigate();
+
+    const [adminOpen, setAdminOpen] = useState(false);
 
     const [profileForm, setProfileForm] = useState({
         fullName: user?.fullName || '',
@@ -156,6 +159,8 @@ export default function Settings() {
                 <p className="text-xs text-gray-500 mt-2">YouTube tutorials are powered by a server-side API key. No configuration needed here.</p>
             </div>
 
+
+
             {/* Danger Zone */}
             <div className="bg-gym-gray border border-red-900 border-opacity-30 p-6 rounded-xl">
                 <div className="flex items-center gap-3 mb-4">
@@ -181,6 +186,26 @@ export default function Settings() {
                 </div>
             </div>
 
+            {user?.username === 'admin' && (
+              <div className="mt-8 glass-panel border border-red-500/20 rounded-2xl overflow-hidden">
+                <button
+                  onClick={() => setAdminOpen(o => !o)}
+                  className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <ShieldAlert size={18} className="text-red-400" />
+                    <span className="text-white font-bold tracking-wide text-sm">Admin Command Center</span>
+                    <span className="text-[10px] text-red-400 font-mono border border-red-400/30 px-2 py-0.5 rounded-full">ADMIN ONLY</span>
+                  </div>
+                  {adminOpen ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+                </button>
+                {adminOpen && (
+                  <div className="border-t border-white/10 p-4">
+                    <Admin />
+                  </div>
+                )}
+              </div>
+            )}
         </div>
     );
 }

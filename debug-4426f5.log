@@ -1,0 +1,24 @@
+{"sessionId":"4426f5","location":"AiController.java:streamAiChat","message":"chat stream request","data":{"userId":1,"messageLen":24},"timestamp":1782987583730,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiAgentOrchestrator.java:streamChat","message":"using provider","data":{"provider":"GROQ"},"timestamp":1782987583738,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiController.java:streamAiChat","message":"chat stream request","data":{"userId":1,"messageLen":24},"timestamp":1782987997649,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiAgentOrchestrator.java:streamChat","message":"using provider","data":{"provider":"GROQ"},"timestamp":1782987997659,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiController.java:streamAiChat","message":"chat stream request","data":{"userId":1,"messageLen":24},"timestamp":1782989805385,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiAgentOrchestrator.java:streamChat","message":"using provider","data":{"provider":"GROQ"},"timestamp":1782989805393,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiController.java:streamAiChat","message":"chat stream request","data":{"userId":1,"messageLen":24},"timestamp":1782993957102,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiAgentOrchestrator.java:streamChat","message":"using provider","data":{"provider":"GROQ"},"timestamp":1782993957155,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiController.java:streamAiChat","message":"chat stream request","data":{"userId":1,"messageLen":29},"timestamp":1782994002429,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiAgentOrchestrator.java:streamChat","message":"using provider","data":{"provider":"GROQ"},"timestamp":1782994002444,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiController.java:streamAiChat","message":"chat stream request","data":{"userId":1,"messageLen":44},"timestamp":1782994079907,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiAgentOrchestrator.java:streamChat","message":"using provider","data":{"provider":"GROQ"},"timestamp":1782994079922,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiController.java:streamAiChat","message":"chat stream request","data":{"userId":1,"messageLen":24},"timestamp":1782994860317,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiAgentOrchestrator.java:streamChat","message":"using provider","data":{"provider":"GROQ"},"timestamp":1782994860361,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiController.java:streamAiChat","message":"chat stream request","data":{"userId":1,"messageLen":43},"timestamp":1782994888955,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiAgentOrchestrator.java:streamChat","message":"using provider","data":{"provider":"GROQ"},"timestamp":1782994888965,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiController.java:streamAiChat","message":"chat stream request","data":{"userId":2,"messageLen":24},"timestamp":1782995272285,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiAgentOrchestrator.java:streamChat","message":"using provider","data":{"provider":"GROQ"},"timestamp":1782995272293,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiController.java:streamAiChat","message":"chat stream request","data":{"userId":1,"messageLen":24},"timestamp":1783061870732,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiAgentOrchestrator.java:streamChat","message":"using provider","data":{"provider":"GEMINI"},"timestamp":1783061870790,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiController.java:streamAiChat","message":"chat stream request","data":{"userId":1,"messageLen":2},"timestamp":1783061885802,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiAgentOrchestrator.java:streamChat","message":"using provider","data":{"provider":"GROQ"},"timestamp":1783061885819,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiController.java:streamAiChat","message":"chat stream request","data":{"userId":1,"messageLen":24},"timestamp":1783061901319,"hypothesisId":"D"}
+{"sessionId":"4426f5","location":"AiAgentOrchestrator.java:streamChat","message":"using provider","data":{"provider":"GROQ"},"timestamp":1783061901330,"hypothesisId":"D"}

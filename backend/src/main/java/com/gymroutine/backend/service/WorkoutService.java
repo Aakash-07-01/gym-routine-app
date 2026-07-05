@@ -16,11 +16,13 @@ public class WorkoutService {
     private final WorkoutLogRepository logRepo;
     private final ExerciseSessionRepository sessionRepo;
     private final PRRepository prRepo;
+    private final PRHistoryRepository prHistoryRepo;
 
-    public WorkoutService(WorkoutLogRepository logRepo, ExerciseSessionRepository sessionRepo, PRRepository prRepo) {
+    public WorkoutService(WorkoutLogRepository logRepo, ExerciseSessionRepository sessionRepo, PRRepository prRepo, PRHistoryRepository prHistoryRepo) {
         this.logRepo = logRepo;
         this.sessionRepo = sessionRepo;
         this.prRepo = prRepo;
+        this.prHistoryRepo = prHistoryRepo;
     }
 
     public WorkoutLog completeWorkout(User user, WorkoutCompleteRequest req) {
@@ -80,12 +82,37 @@ public class WorkoutService {
                     pr.setMaxRepsAtWeight(repsToSave);
                     pr.setDateAchieved(LocalDateTime.now());
                     prRepo.save(pr);
+
+                    PRHistory newHistory = new PRHistory();
+                    newHistory.setUser(user);
+                    newHistory.setExerciseName(stat.name);
+                    newHistory.setMaxWeight(weightToSave);
+                    newHistory.setMaxRepsAtWeight(repsToSave);
+                    newHistory.setDateAchieved(pr.getDateAchieved());
+                    prHistoryRepo.save(newHistory);
                 } else if (weightToSave > pr.getMaxWeight()
                         || (weightToSave == pr.getMaxWeight() && repsToSave > pr.getMaxRepsAtWeight())) {
+                    
+                    PRHistory oldHistory = new PRHistory();
+                    oldHistory.setUser(user);
+                    oldHistory.setExerciseName(pr.getExerciseName());
+                    oldHistory.setMaxWeight(pr.getMaxWeight());
+                    oldHistory.setMaxRepsAtWeight(pr.getMaxRepsAtWeight());
+                    oldHistory.setDateAchieved(pr.getDateAchieved());
+                    prHistoryRepo.save(oldHistory);
+
                     pr.setMaxWeight(weightToSave);
                     pr.setMaxRepsAtWeight(repsToSave);
                     pr.setDateAchieved(LocalDateTime.now());
                     prRepo.save(pr);
+
+                    PRHistory newHistory = new PRHistory();
+                    newHistory.setUser(user);
+                    newHistory.setExerciseName(stat.name);
+                    newHistory.setMaxWeight(weightToSave);
+                    newHistory.setMaxRepsAtWeight(repsToSave);
+                    newHistory.setDateAchieved(pr.getDateAchieved());
+                    prHistoryRepo.save(newHistory);
                 }
             }
         }

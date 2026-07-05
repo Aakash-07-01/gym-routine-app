@@ -24,19 +24,14 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> authenticate(
-            @RequestBody AuthRequest request) {
+    public ResponseEntity<com.gymroutine.backend.dto.AuthResponse> login(
+            @RequestBody com.gymroutine.backend.dto.AuthRequest request) {
         return ResponseEntity.ok(authService.authenticate(request));
     }
 
-    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
-    public ResponseEntity<java.util.Map<String, String>> handleBadCredentials(
-            org.springframework.security.authentication.BadCredentialsException ex) {
-        return ResponseEntity.status(401).body(java.util.Map.of("message", ex.getMessage()));
+    @PostMapping("/logout")
+    public ResponseEntity<java.util.Map<String, String>> logout() {
+        return ResponseEntity.ok(java.util.Map.of("message", "Logged out"));
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<java.util.Map<String, String>> handleRuntimeException(RuntimeException ex) {
-        return ResponseEntity.status(400).body(java.util.Map.of("message", ex.getMessage()));
-    }
 }

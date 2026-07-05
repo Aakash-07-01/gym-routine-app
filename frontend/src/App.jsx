@@ -1,19 +1,17 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+
 import MainLayout from './components/layout/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Routine from './pages/Routine';
-import Templates from './pages/Templates';
-import History from './pages/History';
-import Progress from './pages/Progress';
+import TrainingHub from './pages/TrainingHub';
+import ProgressHub from './pages/ProgressHub';
 import Notes from './pages/Notes';
 import Nutrition from './pages/Nutrition';
 import Settings from './pages/Settings';
 import Admin from './pages/Admin';
 import CustomSplitBuilder from './pages/CustomSplitBuilder';
-import PRs from './pages/PRs';
 import useAuthStore from './store/authStore';
 import useGymStore from './store/gymStore';
 import { AnimatePresence } from 'framer-motion';
@@ -42,18 +40,24 @@ function App() {
         {/* Protected Routes */}
         <Route path="/" element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" />}>
           <Route index element={<Dashboard />} />
-          <Route path="routine" element={<Routine />} />
-          <Route path="templates" element={<Templates />} />
+          <Route path="training" element={<TrainingHub />} />
+          <Route path="progress" element={<ProgressHub />} />
           <Route path="builder" element={<CustomSplitBuilder />} />
           <Route path="builder/:sourceId" element={<CustomSplitBuilder />} />
-          <Route path="history" element={<History />} />
-          <Route path="progress" element={<Progress />} />
           <Route path="notes" element={<Notes />} />
           <Route path="nutrition" element={<Nutrition />} />
-          <Route path="prs" element={<PRs />} />
+
+          <Route path="routine"   element={<Navigate to="/training" replace />} />
+          <Route path="prs"       element={<Navigate to="/training" replace />} />
+          <Route path="templates" element={<Navigate to="/training" replace />} />
+          <Route path="history"   element={<Navigate to="/progress" replace />} />
+          <Route path="analysis"  element={<Navigate to="/progress" replace />} />
           <Route path="settings" element={<Settings />} />
           <Route path="admin" element={<Admin />} />
         </Route>
+        
+        {/* Catch-all Route for 404s */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <AnimatePresence>
         {showNewWeekSummary && <NewWeekModal summary={showNewWeekSummary} />}

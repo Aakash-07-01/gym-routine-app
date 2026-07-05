@@ -9,12 +9,16 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.gymroutine.backend.ai.agent.AiAgentOrchestrator;
+
 @Service
 public class NutritionService {
     private final NutritionLogRepository repo;
+    private final AiAgentOrchestrator orchestrator;
 
-    public NutritionService(NutritionLogRepository repo) {
+    public NutritionService(NutritionLogRepository repo, AiAgentOrchestrator orchestrator) {
         this.repo = repo;
+        this.orchestrator = orchestrator;
     }
 
     public NutritionLog saveLog(User user, NutritionLog log) {
@@ -22,6 +26,16 @@ public class NutritionService {
         if (log.getLogDate() == null) {
             log.setLogDate(LocalDateTime.now());
         }
+        
+        // Auto-calculate macros if they are not provided
+        if (log.getCalories() == null || log.getCalories() == 0) {
+            NutritionLog estimated = orchestrator.estimateMacrosForMeal(log.getMealName());
+            log.setCalories(estimated.getCalories());
+            log.setProteinGram(estimated.getProteinGram());
+            log.setCarbsGram(estimated.getCarbsGram());
+            log.setFatGram(estimated.getFatGram());
+        }
+        
         return repo.save(log);
     }
 

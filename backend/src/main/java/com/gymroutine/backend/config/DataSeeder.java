@@ -6,12 +6,15 @@ import com.gymroutine.backend.model.User;
 import com.gymroutine.backend.model.WorkoutDay;
 import com.gymroutine.backend.repository.SplitRepository;
 import com.gymroutine.backend.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -26,11 +29,24 @@ public class DataSeeder implements ApplicationRunner {
         private final UserRepository userRepository;
         private final PasswordEncoder passwordEncoder;
 
+        private final com.gymroutine.backend.repository.WorkoutLogRepository logRepository;
+        private final com.gymroutine.backend.repository.PRRepository prRepository;
+        private final com.gymroutine.backend.repository.ExerciseSessionRepository sessionRepository;
+
+        @PersistenceContext
+        private EntityManager entityManager;
+
         public DataSeeder(SplitRepository splitRepository, UserRepository userRepository,
-                        PasswordEncoder passwordEncoder) {
+                        PasswordEncoder passwordEncoder,
+                        com.gymroutine.backend.repository.WorkoutLogRepository logRepository,
+                        com.gymroutine.backend.repository.PRRepository prRepository,
+                        com.gymroutine.backend.repository.ExerciseSessionRepository sessionRepository) {
                 this.splitRepository = splitRepository;
                 this.userRepository = userRepository;
                 this.passwordEncoder = passwordEncoder;
+                this.logRepository = logRepository;
+                this.prRepository = prRepository;
+                this.sessionRepository = sessionRepository;
         }
 
         @Override
@@ -38,24 +54,25 @@ public class DataSeeder implements ApplicationRunner {
         public void run(ApplicationArguments args) {
                 seedAdmin();
 
-                if (!splitRepository.findByIsTemplateTrue().isEmpty()) {
+                if (splitRepository.findByIsTemplateTrue().isEmpty()) {
+                        log.info("Seeding default split templates...");
+                        seedPPL();
+                        seedUpperLower();
+                        seedArnoldSplit();
+                        seedFullBody();
+                        seedBroSplit();
+                        seed531();
+                        log.info("Default templates seeded successfully.");
+                } else {
                         log.info("Templates already seeded. Skipping.");
-                        return;
                 }
-                log.info("Seeding default split templates...");
 
-                seedPPL();
-                seedUpperLower();
-                seedArnoldSplit();
-                seedFullBody();
-                seedBroSplit();
-                seed531();
-
-                log.info("Default templates seeded successfully.");
+                seedAdminMockData();
         }
 
-        private void seedAdmin() {
-                if (userRepository.findByUsername("admin").isEmpty()) {
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        public void seedAdmin() {
+                if (userRepository.findByUsernameIgnoreCase("admin").isEmpty()) {
                         log.info("Seeding default admin user...");
                         User admin = User.builder()
                                         .username("admin")
@@ -68,7 +85,124 @@ public class DataSeeder implements ApplicationRunner {
                 }
         }
 
-        private void seedPPL() {
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        public void seedAdminMockData() {
+                User admin = userRepository.findByUsernameIgnoreCase("admin").orElse(null);
+                if (admin == null)
+                        return;
+
+                if (!logRepository.findByUserIdAndCompletedAtAfter(admin.getId(),
+                                java.time.LocalDateTime.now().minusYears(1)).isEmpty()) {
+                        return;
+                }
+
+                log.info("Seeding structured test data for admin...");
+                java.time.LocalDateTime now = java.time.LocalDateTime.now();
+
+                // 90 days of progressive overload
+                String[] pushExercises = {"Barbell Bench Press", "Overhead Press", "Incline Dumbbell Press", "Tricep Pushdowns"};
+                String[] pullExercises = {"Deadlift", "Barbell Rows", "Pull-Ups", "Barbell Curls"};
+                String[] legExercises = {"Barbell Squat", "Leg Press", "Leg Curls", "Calf Raises"};
+
+                String[] dayNames = { "Push Day", "Pull Day", "Leg Day", "Rest", "Push Day", "Pull Day", "Rest" };
+
+                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+
+                // Cache PR map to avoid N+1 queries inside the loop
+                java.util.Map<String, com.gymroutine.backend.model.PR> prCache = new java.util.HashMap<>();
+                prRepository.findAllByUser(admin).forEach(p -> prCache.put(p.getExerciseName().toLowerCase(), p));
+
+                // Fetch matchDay once outside the loop
+                java.util.List<com.gymroutine.backend.model.Split> splits = splitRepository.findAll();
+                if (splits.isEmpty() || splits.get(0).getWorkoutDays() == null || splits.get(0).getWorkoutDays().isEmpty()) {
+                        log.warn("No splits with workout days found — skipping admin mock data seeding.");
+                        return;
+                }
+                com.gymroutine.backend.model.WorkoutDay matchDay = splits.get(0).getWorkoutDays().get(0);
+
+                int batchSize = 10;
+                int count = 0;
+
+                for (int i = 90; i >= 0; i--) {
+                        String dName = dayNames[(90 - i) % 7];
+                        if (dName.equals("Rest")) continue;
+
+                        com.gymroutine.backend.model.WorkoutLog wl = new com.gymroutine.backend.model.WorkoutLog();
+                        wl.setUser(admin);
+                        wl.setCompletedAt(now.minusDays(i));
+                        wl.setDayName(dName);
+                        wl.setWorkoutDay(matchDay);
+                        wl = logRepository.save(wl);
+
+                        String[] exercises = dName.equals("Push Day") ? pushExercises :
+                                           dName.equals("Pull Day") ? pullExercises : legExercises;
+
+                        double progressionFactor = 1.0 + ((90 - i) * 0.005);
+
+                        for (int j = 0; j < exercises.length; j++) {
+                                com.gymroutine.backend.model.ExerciseSession session = new com.gymroutine.backend.model.ExerciseSession();
+                                session.setUser(admin);
+                                session.setWorkoutLog(wl);
+                                session.setExerciseName(exercises[j]);
+                                session.setCompletedAt(now.minusDays(i));
+
+                                double baseWeight = j == 0 ? 60.0 : j == 1 ? 40.0 : 20.0;
+                                double weight = Math.round((baseWeight * progressionFactor) * 2) / 2.0;
+
+                                session.setSetsCompleted(4);
+                                session.setRepsPerSet(8);
+                                session.setWeightUsed(weight);
+
+                                List<java.util.Map<String, Object>> setsList = new ArrayList<>();
+                                for (int s = 0; s < 4; s++) {
+                                        java.util.Map<String, Object> set = new java.util.HashMap<>();
+                                        set.put("reps", 8);
+                                        set.put("weight", weight);
+                                        setsList.add(set);
+                                }
+                                try {
+                                        session.setSetsData(mapper.writeValueAsString(setsList));
+                                } catch (Exception e) {}
+
+                                sessionRepository.save(session);
+
+                                // Update PR using cache to avoid repeated DB queries
+                                String key = exercises[j].toLowerCase();
+                                com.gymroutine.backend.model.PR pr = prCache.get(key);
+
+                                if (pr == null) {
+                                        pr = new com.gymroutine.backend.model.PR();
+                                        pr.setUser(admin);
+                                        pr.setExerciseName(exercises[j]);
+                                        pr.setMaxWeight(weight);
+                                        pr.setMaxRepsAtWeight(8);
+                                        pr.setDateAchieved(now.minusDays(i));
+                                        prRepository.save(pr);
+                                        prCache.put(key, pr);
+                                } else if (weight >= pr.getMaxWeight()) {
+                                        pr.setMaxWeight(weight);
+                                        pr.setMaxRepsAtWeight(8);
+                                        pr.setDateAchieved(now.minusDays(i));
+                                        prRepository.save(pr);
+                                }
+                        }
+
+                        // Flush and clear the persistence context every batchSize days
+                        // to prevent the L1 cache from accumulating all entities in memory
+                        count++;
+                        if (count % batchSize == 0) {
+                                entityManager.flush();
+                                entityManager.clear();
+                                // Re-attach admin and matchDay after clear
+                                admin = entityManager.merge(admin);
+                                matchDay = entityManager.merge(matchDay);
+                        }
+                }
+                log.info("Finished seeding structured test data for admin.");
+        }
+
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        public void seedPPL() {
                 Split split = createTemplate("PPL (Push Pull Legs)");
                 List<WorkoutDay> days = new ArrayList<>();
 
@@ -117,7 +251,8 @@ public class DataSeeder implements ApplicationRunner {
                 splitRepository.save(split);
         }
 
-        private void seedUpperLower() {
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        public void seedUpperLower() {
                 Split split = createTemplate("Upper/Lower Split");
                 List<WorkoutDay> days = new ArrayList<>();
 
@@ -153,7 +288,8 @@ public class DataSeeder implements ApplicationRunner {
                 splitRepository.save(split);
         }
 
-        private void seedArnoldSplit() {
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        public void seedArnoldSplit() {
                 Split split = createTemplate("Arnold Split");
                 List<WorkoutDay> days = new ArrayList<>();
 
@@ -202,7 +338,8 @@ public class DataSeeder implements ApplicationRunner {
                 splitRepository.save(split);
         }
 
-        private void seedFullBody() {
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        public void seedFullBody() {
                 Split split = createTemplate("Full Body");
                 List<WorkoutDay> days = new ArrayList<>();
 
@@ -232,7 +369,8 @@ public class DataSeeder implements ApplicationRunner {
                 splitRepository.save(split);
         }
 
-        private void seedBroSplit() {
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        public void seedBroSplit() {
                 Split split = createTemplate("Bro Split");
                 List<WorkoutDay> days = new ArrayList<>();
 
@@ -273,7 +411,8 @@ public class DataSeeder implements ApplicationRunner {
                 splitRepository.save(split);
         }
 
-        private void seed531() {
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
+        public void seed531() {
                 Split split = createTemplate("5/3/1 Powerlifting");
                 List<WorkoutDay> days = new ArrayList<>();
 

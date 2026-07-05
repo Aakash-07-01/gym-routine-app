@@ -61,10 +61,35 @@ public class DashboardService {
                                         : "Log notes today to receive insights!");
                 });
 
-                // 5. Hardcode Defaults for the mockup transition
-                dto.setStreak(workoutLogRepo.findAllByUserOrderByCompletedAtDesc(user).size()); // naive placeholder,
-                                                                                                // requires full day
-                                                                                                // diff logic
+                // 5. Calculate actual streak
+                java.util.List<WorkoutLog> logs = workoutLogRepo.findAllByUserOrderByCompletedAtDesc(user);
+                int streak = 0;
+                if (!logs.isEmpty()) {
+                        java.util.List<LocalDate> distinctDates = logs.stream()
+                                        .map(l -> l.getCompletedAt().toLocalDate())
+                                        .distinct()
+                                        .collect(java.util.stream.Collectors.toList());
+
+                        LocalDate today = LocalDate.now();
+                        LocalDate yesterday = today.minusDays(1);
+                        LocalDate lastWorkoutDate = distinctDates.get(0);
+
+                        if (lastWorkoutDate.equals(today) || lastWorkoutDate.equals(yesterday)) {
+                                streak = 1;
+                                LocalDate expectedDate = lastWorkoutDate.minusDays(1);
+                                for (int i = 1; i < distinctDates.size(); i++) {
+                                        LocalDate d = distinctDates.get(i);
+                                        if (d.equals(expectedDate)) {
+                                                streak++;
+                                                expectedDate = expectedDate.minusDays(1);
+                                        } else {
+                                                break;
+                                        }
+                                }
+                        }
+                }
+                dto.setStreak(streak);
+
                 dto.setTodaysFocus(user.getPrimaryGoal() != null ? user.getPrimaryGoal() + " Focus" : "Rest");
 
                 return dto;

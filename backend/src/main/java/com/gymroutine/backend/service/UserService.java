@@ -14,6 +14,12 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    @Transactional(readOnly = true)
+    public User getProfile(String username) {
+        return userRepository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
     @Transactional
     public User updateProfile(String username, UpdateProfileRequest request) {
         User user = userRepository.findByUsernameIgnoreCase(username)

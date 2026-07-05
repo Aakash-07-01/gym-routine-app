@@ -30,6 +30,10 @@ public class LogService {
                 WorkoutDay day = dayRepository.findById(dayId)
                                 .orElseThrow(() -> new RuntimeException("WorkoutDay not found"));
 
+                if (day.getSplit().getUser() == null || !day.getSplit().getUser().getUsername().equalsIgnoreCase(username)) {
+                        throw new org.springframework.security.access.AccessDeniedException("WorkoutDay does not belong to this user");
+                }
+
                 WorkoutLog log = WorkoutLog.builder()
                                 .user(user)
                                 .workoutDay(day)

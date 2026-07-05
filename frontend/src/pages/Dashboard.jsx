@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { getWeeklyInsight, regenerateWeeklyInsight } from '../api/ai';
 import { motion, AnimatePresence } from 'framer-motion';
 import useAuthStore from '../store/authStore';
 import toast from 'react-hot-toast';
@@ -18,12 +19,17 @@ export default function Dashboard() {
     const [showWeeklyModal, setShowWeeklyModal] = useState(false);
     const [showMetricsPrompt, setShowMetricsPrompt] = useState(false);
 
+    // AI Insight
+    const [aiInsightData, setAiInsightData] = useState(null);
+    const [loadingAi, setLoadingAi] = useState(true);
+
     useEffect(() => {
         if (!token) {
             navigate('/register');
         } else {
             fetchDashboardStats();
             checkWeeklySummary();
+            fetchWeeklyAiInsight();
         }
     }, [token, navigate]);
 
@@ -47,6 +53,31 @@ export default function Dashboard() {
                     logout();
                 }
             } catch (e) { }
+        }
+    };
+
+    const fetchWeeklyAiInsight = async () => {
+        setLoadingAi(true);
+        try {
+            const res = await getWeeklyInsight();
+            setAiInsightData(res.data);
+        } catch (e) {
+            console.error("Failed to fetch AI insight:", e);
+            setAiInsightData(null);
+        } finally {
+            setLoadingAi(false);
+        }
+    };
+
+    const handleRegenerateInsight = async () => {
+        setLoadingAi(true);
+        try {
+            const res = await regenerateWeeklyInsight();
+            setAiInsightData(res.data);
+        } catch (e) {
+            console.error("Failed to regenerate AI insight:", e);
+        } finally {
+            setLoadingAi(false);
         }
     };
 
@@ -157,17 +188,37 @@ export default function Dashboard() {
                     <div className="absolute top-0 right-0 bg-gym-blue/20 text-gym-blue text-xs font-mono px-3 py-1 rounded-bl-lg border-b border-l border-gym-blue/30 shadow-sm">
                         AI INSIGHT
                     </div>
-                    <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">Daily Analysis</h2>
-                    <div className="p-4 bg-white/5 rounded-lg border border-white/5 group-hover:border-white/10 transition-colors min-h-[100px]">
-                        <p className="text-gray-300 font-mono text-sm leading-relaxed">
-                            {stats?.aiInsight ? stats.aiInsight : "You haven't logged any notes recently. Track your energy to generate insights."}
-                        </p>
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-xl font-bold text-white flex items-center gap-2">Weekly Insight</h2>
+                        {aiInsightData && !loadingAi && (
+                            <button 
+                                onClick={handleRegenerateInsight}
+                                className="text-xs text-gym-blue hover:text-white transition-colors"
+                            >
+                                Regenerate
+                            </button>
+                        )}
                     </div>
-                    {!stats?.aiInsight && (
-                        <Link to="/notes" className="inline-flex items-center gap-2 mt-4 text-gym-blue hover:text-white font-semibold text-sm tracking-wide transition-colors">
-                            Log a Note <span className="text-lg">→</span>
-                        </Link>
-                    )}
+                    
+                    <div className="p-4 bg-white/5 rounded-lg border border-white/5 group-hover:border-white/10 transition-colors min-h-[100px]">
+                        {loadingAi ? (
+                            <div className="animate-pulse space-y-3">
+                                <div className="h-2 bg-white/20 rounded w-full"></div>
+                                <div className="h-2 bg-white/20 rounded w-5/6"></div>
+                                <div className="h-2 bg-white/20 rounded w-4/6"></div>
+                            </div>
+                        ) : aiInsightData ? (
+                            <>
+                                <p className="text-gray-300 font-mono text-sm leading-relaxed">
+                                    {aiInsightData.content}
+                                </p>
+                            </>
+                        ) : (
+                            <p className="text-gray-300 font-mono text-sm leading-relaxed">
+                                Your AI insight will be ready after your first workout this week.
+                            </p>
+                        )}
+                    </div>
                 </div>
 
                 {/* Today's Workout Focus */}
@@ -180,7 +231,7 @@ export default function Dashboard() {
                         <p className="text-gym-accent font-mono text-sm mt-2">Next Session: Automatic</p>
                     </div>
                     <div className="mt-4">
-                        <Link to="/routine" className="block w-full text-center glass-button font-bold text-lg py-3 rounded-lg uppercase tracking-wide">
+                        <Link to="/training" className="block w-full text-center glass-button font-bold text-lg py-3 rounded-lg uppercase tracking-wide">
                             Enter Workout
                         </Link>
                     </div>
@@ -203,7 +254,7 @@ export default function Dashboard() {
                     ) : (
                         <div>
                             <p className="text-lg sm:text-xl font-bold text-gray-600">--</p>
-                            <Link to="/routine" className="text-[10px] text-gym-accent uppercase font-bold tracking-widest hover:underline mt-1 block">Log Workout</Link>
+                            <Link to="/training" className="text-[10px] text-gym-accent uppercase font-bold tracking-widest hover:underline mt-1 block">Log Workout</Link>
                         </div>
                     )}
                 </div>

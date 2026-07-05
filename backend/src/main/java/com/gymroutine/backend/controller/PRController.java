@@ -16,13 +16,22 @@ import java.util.List;
 public class PRController {
 
     private final PRRepository prRepository;
+    private final com.gymroutine.backend.repository.PRHistoryRepository prHistoryRepository;
 
-    public PRController(PRRepository prRepository) {
+    public PRController(PRRepository prRepository, com.gymroutine.backend.repository.PRHistoryRepository prHistoryRepository) {
         this.prRepository = prRepository;
+        this.prHistoryRepository = prHistoryRepository;
     }
 
     @GetMapping
     public ResponseEntity<List<PR>> getUserPRs(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(prRepository.findAllByUser(user));
+    }
+
+    @GetMapping("/{exerciseName}/history")
+    public ResponseEntity<List<com.gymroutine.backend.model.PRHistory>> getPRHistory(
+            @AuthenticationPrincipal User user,
+            @org.springframework.web.bind.annotation.PathVariable String exerciseName) {
+        return ResponseEntity.ok(prHistoryRepository.findAllByUserAndExerciseNameOrderByDateAchievedDesc(user, exerciseName));
     }
 }
