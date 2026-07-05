@@ -76,12 +76,12 @@ export default function Nutrition() {
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="space-y-8 max-w-5xl mx-auto pb-20">
-            <header className="flex justify-between items-end mb-4 border-b-2 border-[#222] pb-6">
+            <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-4 border-b-2 border-[#222] pb-6">
                 <div>
-                    <h1 className="text-5xl font-bebas text-white tracking-widest uppercase drop-shadow-md">Macro Tracker</h1>
+                    <h1 className="text-4xl md:text-5xl font-bebas text-white tracking-widest uppercase drop-shadow-md">Macro Tracker</h1>
                     <p className="text-gray-400 mt-2 font-mono tracking-widest text-sm uppercase">Fuel your metrics.</p>
                 </div>
-                <button onClick={() => setFormOpen(!formOpen)} className="btn-3d-cyan px-6 py-3 rounded-xl font-bebas text-xl tracking-widest uppercase text-black flex items-center gap-2">
+                <button onClick={() => setFormOpen(!formOpen)} className="w-full sm:w-auto btn-3d-cyan px-6 py-3 rounded-xl font-bebas text-xl tracking-widest uppercase text-black flex items-center justify-center gap-2">
                     {formOpen ? 'CLOSE' : <><PlusCircle size={20} /> Log Meal</>}
                 </button>
             </header>
@@ -110,10 +110,10 @@ export default function Nutrition() {
 
             {/* Daily Totals */}
             <h2 className="text-3xl font-bebas text-white tracking-widest uppercase mb-4">Daily Totals</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-10">
                 <div className="card-3d p-6 bg-[#111] border-l-[#C8FF00] relative overflow-hidden">
                     <p className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2">Calories</p>
-                    <p className="text-5xl font-bebas text-white">{totalCals}</p>
+                    <p className="text-4xl sm:text-5xl font-bebas text-white">{totalCals}</p>
                     <div className="w-full bg-[#333] h-1.5 mt-4 rounded-full overflow-hidden">
                         <div className="bg-[#C8FF00] h-full transition-all" style={{ width: `${Math.min((totalCals / calGoal) * 100, 100)}%` }}></div>
                     </div>
@@ -122,7 +122,7 @@ export default function Nutrition() {
 
                 <div className="card-3d p-6 bg-[#111] border-l-[#00E5FF]">
                     <p className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2">Protein</p>
-                    <p className="text-5xl font-bebas text-[#00E5FF]">{totalPro}<span className="text-xl">g</span></p>
+                    <p className="text-4xl sm:text-5xl font-bebas text-[#00E5FF]">{totalPro}<span className="text-xl">g</span></p>
                     <div className="w-full bg-[#333] h-1.5 mt-4 rounded-full overflow-hidden">
                         <div className="bg-[#00E5FF] h-full transition-all" style={{ width: `${Math.min((totalPro / proGoal) * 100, 100)}%` }}></div>
                     </div>
@@ -131,12 +131,12 @@ export default function Nutrition() {
 
                 <div className="card-3d p-6 bg-[#111] border-l-[#FF0055]">
                     <p className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2">Carbs</p>
-                    <p className="text-5xl font-bebas text-white">{totalCarb}<span className="text-xl">g</span></p>
+                    <p className="text-4xl sm:text-5xl font-bebas text-white">{totalCarb}<span className="text-xl">g</span></p>
                 </div>
 
                 <div className="card-3d p-6 bg-[#111] border-l-orange-500">
                     <p className="text-xs text-gray-400 uppercase tracking-widest font-bold mb-2">Fats</p>
-                    <p className="text-5xl font-bebas text-white">{totalFat}<span className="text-xl">g</span></p>
+                    <p className="text-4xl sm:text-5xl font-bebas text-white">{totalFat}<span className="text-xl">g</span></p>
                 </div>
             </div>
 
@@ -152,12 +152,12 @@ export default function Nutrition() {
             ) : (
                 <div className="space-y-4">
                     {logs.map(log => (
-                        <div key={log.id} className="card-3d-item bg-[#1a1a1a] p-5 border-[#333] flex justify-between items-center rounded-xl hover:border-[#00E5FF]/50 transition-colors">
+                        <div key={log.id} className="card-3d-item bg-[#1a1a1a] p-4 sm:p-5 border-[#333] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-xl hover:border-[#00E5FF]/50 transition-colors">
                             <div>
-                                <h3 className="text-xl font-bebas uppercase text-white tracking-widest">{log.mealName}</h3>
+                                <h3 className="text-lg sm:text-xl font-bebas uppercase text-white tracking-widest">{log.mealName}</h3>
                                 <p className="text-xs font-mono text-gray-500 mt-1">{new Date(log.logDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                             </div>
-                            <div className="flex items-center gap-6">
+                            <div className="flex items-center gap-4 sm:gap-6 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 border-[#333] pt-3 sm:pt-0">
                                 <div className="text-center">
                                     <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">PRO</p>
                                     <p className="text-sm font-mono text-[#00E5FF]">{log.proteinGram || 0}</p>

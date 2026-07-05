@@ -80,7 +80,7 @@ export default function AIChatBot() {
             animate={{ opacity: 1, y: 0,  scale: 1    }}
             exit={{    opacity: 0, y: 16, scale: 0.96 }}
             transition={{ duration: 0.18 }}
-            className="fixed bottom-40 right-4 z-50 w-[340px] sm:w-[380px] h-[500px] flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#0e0e0e]/95 backdrop-blur-xl"
+            className="fixed bottom-20 sm:bottom-40 right-4 z-50 w-[calc(100vw-32px)] sm:w-[380px] h-[60vh] sm:h-[500px] flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#0e0e0e]/95 backdrop-blur-xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#080808]/80 flex-shrink-0">
