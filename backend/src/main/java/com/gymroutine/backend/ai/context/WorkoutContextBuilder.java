@@ -18,17 +18,20 @@ public class WorkoutContextBuilder {
     private final PRRepository prRepo;
     private final BodyMetricsLogRepository metricsRepo;
     private final UserRepository userRepo;
+    private final NutritionLogRepository nutritionLogRepo;
 
     public WorkoutContextBuilder(WorkoutLogRepository workoutLogRepo,
                                  ExerciseSessionRepository sessionRepo,
                                  PRRepository prRepo,
                                  BodyMetricsLogRepository metricsRepo,
-                                 UserRepository userRepo) {
+                                 UserRepository userRepo,
+                                 NutritionLogRepository nutritionLogRepo) {
         this.workoutLogRepo = workoutLogRepo;
         this.sessionRepo = sessionRepo;
         this.prRepo = prRepo;
         this.metricsRepo = metricsRepo;
         this.userRepo = userRepo;
+        this.nutritionLogRepo = nutritionLogRepo;
     }
 
     public AiAgentContext buildWeeklyContext(Long userId) {
@@ -128,6 +131,29 @@ public class WorkoutContextBuilder {
         contextText.append("\nTop PRs:\n");
         for (PR pr : prs) {
             contextText.append(String.format("- %s: %.1fkg\n", pr.getExerciseName(), pr.getMaxWeight()));
+        }
+
+        int calGoal = 2500;
+        if ("Fat Loss".equals(user.getPrimaryGoal())) calGoal = 2000;
+        if ("Muscle Gain".equals(user.getPrimaryGoal())) calGoal = 3200;
+        long proGoal = user.getStartingWeight() != null ? Math.round(user.getStartingWeight() * 2) : 150;
+
+        java.time.LocalDateTime startOfDay = java.time.LocalDate.now().atStartOfDay();
+        List<NutritionLog> mealsToday = nutritionLogRepo.findAllByUserAndLogDateAfter(user, startOfDay);
+        int totalCals = mealsToday.stream().mapToInt(l -> l.getCalories() != null ? l.getCalories() : 0).sum();
+        int totalPro = mealsToday.stream().mapToInt(l -> l.getProteinGram() != null ? l.getProteinGram() : 0).sum();
+        
+        contextText.append("\nToday's Nutrition:\n");
+        contextText.append(String.format("Goal: %d kcal, %dg protein\n", calGoal, proGoal));
+        contextText.append(String.format("Consumed: %d kcal, %dg protein\n", totalCals, totalPro));
+        
+        if (!mealsToday.isEmpty()) {
+            contextText.append("Meals logged today:\n");
+            for (NutritionLog meal : mealsToday) {
+                contextText.append(String.format("- %s: %d kcal, %dg pro\n", meal.getMealName(), meal.getCalories() != null ? meal.getCalories() : 0, meal.getProteinGram() != null ? meal.getProteinGram() : 0));
+            }
+        } else {
+            contextText.append("No meals logged yet today.\n");
         }
 
         return AiAgentContext.builder()
