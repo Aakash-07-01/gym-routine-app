@@ -42,11 +42,6 @@ services:
         sync: false
       - key: AI_HUGGINGFACE_API_KEY
         sync: false
-      - key: SPRING_MAIL_USERNAME
-        sync: false
-      - key: SPRING_MAIL_PASSWORD
-        sync: false
-
   - type: web
     name: gym-routine-frontend
     env: static

@@ -21,17 +21,15 @@ public class AuthService {
         private final PasswordEncoder passwordEncoder;
         private final JwtService jwtService;
         private final AuthenticationManager authenticationManager;
-        private final EmailService emailService;
 
         public AuthService(UserRepository repository, BodyMetricsLogRepository bodyMetricsLogRepository,
                         PasswordEncoder passwordEncoder,
-                        JwtService jwtService, AuthenticationManager authenticationManager, EmailService emailService) {
+                        JwtService jwtService, AuthenticationManager authenticationManager) {
                 this.repository = repository;
                 this.bodyMetricsLogRepository = bodyMetricsLogRepository;
                 this.passwordEncoder = passwordEncoder;
                 this.jwtService = jwtService;
                 this.authenticationManager = authenticationManager;
-                this.emailService = emailService;
         }
 
         public AuthResponse register(RegisterRequest request) {

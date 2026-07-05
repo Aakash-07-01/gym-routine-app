@@ -48,8 +48,7 @@ public class User implements UserDetails {
     @Column(nullable = false, columnDefinition = "boolean default false")
     private boolean emailVerified = false;
 
-    private String otpCode;
-    private LocalDateTime otpExpiry;
+
 
     public User() {
     }
@@ -75,21 +74,7 @@ public class User implements UserDetails {
         this.emailVerified = emailVerified;
     }
 
-    public String getOtpCode() {
-        return otpCode;
-    }
 
-    public void setOtpCode(String otpCode) {
-        this.otpCode = otpCode;
-    }
-
-    public LocalDateTime getOtpExpiry() {
-        return otpExpiry;
-    }
-
-    public void setOtpExpiry(LocalDateTime otpExpiry) {
-        this.otpExpiry = otpExpiry;
-    }
 
     public Long getId() {
         return id;
