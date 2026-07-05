@@ -267,7 +267,7 @@ export default function Dashboard() {
                     ) : (
                         <div>
                             <p className="text-lg sm:text-xl font-bold text-gray-600">--</p>
-                            <Link to="/progress" className="text-[10px] text-white uppercase font-bold tracking-widest hover:underline mt-1 block">Log Weight</Link>
+                            <Link to="/progress?tab=metrics" className="text-[10px] text-white uppercase font-bold tracking-widest hover:underline mt-1 block">Log Weight</Link>
                         </div>
                     )}
                 </div>
@@ -280,7 +280,7 @@ export default function Dashboard() {
                     ) : (
                         <div>
                             <p className="text-lg sm:text-xl font-bold text-gray-600">--</p>
-                            <Link to="/progress" className="text-[10px] text-gym-blue uppercase font-bold tracking-widest hover:underline mt-1 block">Calculate Now</Link>
+                            <Link to="/progress?tab=metrics" className="text-[10px] text-gym-blue uppercase font-bold tracking-widest hover:underline mt-1 block">Calculate Now</Link>
                         </div>
                     )}
                 </div>

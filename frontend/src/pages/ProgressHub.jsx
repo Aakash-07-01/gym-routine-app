@@ -8,9 +8,11 @@ import { STRENGTH_LEVEL_COLORS, STRENGTH_STANDARDS, calculate1RM, getStrengthLev
 import VolumeTrendChart from '../components/analysis/VolumeTrendChart';
 import useGymStore from '../store/gymStore';
 import { MUSCLE_NAMES } from '../utils/muscle/mapping/muscleHeadless';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import useAuthStore from '../store/authStore';
+import { useLocation } from 'react-router-dom';
+import Progress from './Progress';
 
 const EXERCISE_TO_MUSCLE_ID = {
   "Barbell Bench Press": ["mid-lower-pectoralis", "anterior-deltoid", "lateral-head-triceps"],
@@ -712,11 +714,21 @@ function AnalyticsTab() {
 
 const TABS = [
   { id: 'calendar',  label: 'Calendar',  icon: CalendarDays },
+  { id: 'metrics',   label: 'Biometrics', icon: Activity },
   { id: 'analytics', label: 'Analytics', icon: BarChart2 },
 ];
 
 export default function ProgressHub() {
+  const location = useLocation();
   const [active, setActive] = useState('calendar');
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab && TABS.some(t => t.id === tab)) {
+      setActive(tab);
+    }
+  }, [location.search]);
   return (
     <div className="pb-12">
       <div className="flex gap-1 mb-6 border-b border-white/10">
@@ -735,6 +747,7 @@ export default function ProgressHub() {
         ))}
       </div>
       {active === 'calendar'  && <CalendarTab />}
+      {active === 'metrics'   && <Progress />}
       {active === 'analytics' && <AnalyticsTab />}
     </div>
   );
