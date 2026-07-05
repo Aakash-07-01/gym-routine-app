@@ -403,7 +403,7 @@ function AnalyticsTab() {
     const [muscleVolumes, setMuscleVolumes] = useState(new Map());
     const [maxVolume, setMaxVolume] = useState(1);
     
-    const [heatmapMode, setHeatmapMode] = useState('volume');
+
     const [muscleColors, setMuscleColors] = useState(new Map());
     const [muscleStrengthInfo, setMuscleStrengthInfo] = useState(new Map());
 
@@ -579,32 +579,7 @@ function AnalyticsTab() {
                             Muscle Activation Heatmap
                         </h3>
                         
-                        <div className="flex justify-center mb-8 relative z-10">
-                            <div className="bg-black/50 p-1 rounded-xl flex border border-white/10 backdrop-blur-md">
-                                <button
-                                    onClick={() => setHeatmapMode('volume')}
-                                    className={`px-6 py-2 rounded-lg font-mono text-sm tracking-wider flex items-center gap-2 transition-all ${
-                                        heatmapMode === 'volume' 
-                                        ? 'bg-gym-blue text-white shadow-[0_0_15px_rgba(0,122,255,0.4)]' 
-                                        : 'text-gray-400 hover:text-white'
-                                    }`}
-                                >
-                                    <Activity size={16} />
-                                    VOLUME (SETS)
-                                </button>
-                                <button
-                                    onClick={() => setHeatmapMode('strength')}
-                                    className={`px-6 py-2 rounded-lg font-mono text-sm tracking-wider flex items-center gap-2 transition-all ${
-                                        heatmapMode === 'strength' 
-                                        ? 'bg-gym-accent text-white shadow-[0_0_15px_rgba(255,107,0,0.4)]' 
-                                        : 'text-gray-400 hover:text-white'
-                                    }`}
-                                >
-                                    <Dumbbell size={16} />
-                                    STRENGTH (PR RANK)
-                                </button>
-                            </div>
-                        </div>
+
 
                         <div className="flex flex-col lg:flex-row gap-8 items-center justify-center relative z-10">
                             <div className="w-full lg:w-1/2 flex justify-center transform hover:scale-[1.02] transition-transform duration-500">
@@ -614,7 +589,7 @@ function AnalyticsTab() {
                                     muscleVolumes={muscleVolumes}
                                     maxVolume={maxVolume}
                                     volumeThresholds={volumeThresholds}
-                                    muscleColors={heatmapMode === 'strength' ? muscleColors : undefined}
+                                    muscleColors={muscleColors}
                                     onPartHover={handlePartHover}
                                     gender={user?.biologicalSex === 'Female' ? 'female' : 'male'}
                                     variant="original"
@@ -627,37 +602,30 @@ function AnalyticsTab() {
                                         <h4 className="text-3xl font-bold text-white mb-4 capitalize">
                                             {MUSCLE_NAMES?.[hoveredMuscle] || getMuscleParams(hoveredMuscle)?.name || hoveredMuscle.replace(/-/g, ' ')}
                                         </h4>
-                                        {heatmapMode === 'volume' ? (
-                                            <div className="inline-flex flex-col items-center justify-center bg-white/5 border border-white/10 rounded-xl p-4 min-w-[140px]">
-                                                <span className="text-4xl font-black text-gym-accent mb-1">{muscleVolumes.get(hoveredMuscle) || 0}</span>
-                                                <span className="text-xs text-gray-500 font-mono uppercase tracking-wider">Total Sets</span>
-                                            </div>
-                                        ) : (
-                                            <div className="inline-flex flex-col items-center justify-center bg-white/5 border border-white/10 rounded-xl p-4 min-w-[180px]">
-                                                {muscleStrengthInfo.has(hoveredMuscle) ? (
-                                                    <>
-                                                        <span className="text-2xl font-black text-white capitalize mb-1" style={{ color: STRENGTH_LEVEL_COLORS[muscleStrengthInfo.get(hoveredMuscle).level] }}>
-                                                            {muscleStrengthInfo.get(hoveredMuscle).level}
-                                                        </span>
-                                                        <span className="text-xs text-gray-400 font-mono tracking-wider mb-2">
-                                                            {muscleStrengthInfo.get(hoveredMuscle).exerciseName}
-                                                        </span>
-                                                        <div className="flex flex-col items-center w-full mt-2 pt-2 border-t border-white/10">
-                                                            <span className="text-[10px] text-gray-500 font-mono uppercase tracking-widest mb-1">Max Lift (1 Rep)</span>
-                                                            <div className="text-xl font-bold text-white">
-                                                                <span className="text-gym-accent">{muscleStrengthInfo.get(hoveredMuscle).oneRepMax}</span>
-                                                                <span className="text-sm text-gray-500 ml-1">{muscleStrengthInfo.get(hoveredMuscle).unit || 'kg'}</span>
-                                                            </div>
+                                        <div className="inline-flex flex-col items-center justify-center bg-white/5 border border-white/10 rounded-xl p-4 min-w-[180px]">
+                                            {muscleStrengthInfo.has(hoveredMuscle) ? (
+                                                <>
+                                                    <span className="text-2xl font-black text-white capitalize mb-1" style={{ color: STRENGTH_LEVEL_COLORS[muscleStrengthInfo.get(hoveredMuscle).level] }}>
+                                                        {muscleStrengthInfo.get(hoveredMuscle).level}
+                                                    </span>
+                                                    <span className="text-xs text-gray-400 font-mono tracking-wider mb-2">
+                                                        {muscleStrengthInfo.get(hoveredMuscle).exerciseName}
+                                                    </span>
+                                                    <div className="flex flex-col items-center w-full mt-2 pt-2 border-t border-white/10">
+                                                        <span className="text-[10px] text-gray-500 font-mono uppercase tracking-widest mb-1">Max Lift (1 Rep)</span>
+                                                        <div className="text-xl font-bold text-white">
+                                                            <span className="text-gym-accent">{muscleStrengthInfo.get(hoveredMuscle).oneRepMax}</span>
+                                                            <span className="text-sm text-gray-500 ml-1">{muscleStrengthInfo.get(hoveredMuscle).unit || 'kg'}</span>
                                                         </div>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <span className="text-2xl font-black text-gray-500 mb-1">Unranked</span>
-                                                        <span className="text-xs text-gray-500 font-mono uppercase tracking-wider text-center">No PR recorded<br/>for this muscle</span>
-                                                    </>
-                                                )}
-                                            </div>
-                                        )}
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="text-2xl font-black text-gray-500 mb-1">Unranked</span>
+                                                    <span className="text-xs text-gray-500 font-mono uppercase tracking-wider text-center">No PR recorded<br/>for this muscle</span>
+                                                </>
+                                            )}
+                                        </div>
                                     </motion.div>
                                 ) : (
                                     <div className="text-center text-gray-500 opacity-60">
