@@ -15,7 +15,9 @@ public class StaticInsightProvider implements AiProvider {
     private final WebClient webClient;
 
     public StaticInsightProvider(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.baseUrl("https://text.pollinations.ai").build();
+        this.webClient = webClientBuilder.baseUrl("https://text.pollinations.ai")
+                .defaultHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+                .build();
     }
 
     @Override
