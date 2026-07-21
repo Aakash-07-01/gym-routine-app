@@ -16,6 +16,9 @@ import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Map;
+import java.time.Duration;
+import reactor.netty.http.client.HttpClient;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 
 @Service
 public class MistralProvider implements AiProvider {
@@ -34,7 +37,10 @@ public class MistralProvider implements AiProvider {
 
     public MistralProvider(CircuitBreakerRegistry circuitBreakerRegistry, WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
         this.circuitBreakerRegistry = circuitBreakerRegistry;
-        this.webClient = webClientBuilder.baseUrl(BASE_URL).build();
+        HttpClient httpClient = HttpClient.create().responseTimeout(Duration.ofSeconds(15));
+        this.webClient = webClientBuilder.baseUrl(BASE_URL)
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .build();
         this.objectMapper = objectMapper;
     }
 
@@ -122,8 +128,16 @@ public class MistralProvider implements AiProvider {
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToFlux(String.class)
-                .filter(chunk -> !chunk.equals("[DONE]"))
                 .mapNotNull(chunk -> {
+                    if (chunk.startsWith("data: ")) {
+                        chunk = chunk.substring(6);
+                    } else if (chunk.startsWith("data:")) {
+                        chunk = chunk.substring(5);
+                    }
+                    chunk = chunk.trim();
+                    if (chunk.isEmpty() || chunk.equals("[DONE]")) {
+                        return null;
+                    }
                     try {
                         JsonNode node = objectMapper.readTree(chunk);
                         JsonNode delta = node.path("choices").get(0).path("delta");

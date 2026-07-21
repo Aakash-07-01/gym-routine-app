@@ -15,7 +15,10 @@ public class StaticInsightProvider implements AiProvider {
     private final WebClient webClient;
 
     public StaticInsightProvider(WebClient.Builder webClientBuilder) {
+        reactor.netty.http.client.HttpClient httpClient = reactor.netty.http.client.HttpClient.create()
+                .responseTimeout(Duration.ofSeconds(15));
         this.webClient = webClientBuilder.baseUrl("https://text.pollinations.ai")
+                .clientConnector(new org.springframework.http.client.reactive.ReactorClientHttpConnector(httpClient))
                 .defaultHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
                 .build();
     }
@@ -50,12 +53,13 @@ public class StaticInsightProvider implements AiProvider {
         try {
             content = webClient.post()
                     .uri("/")
+                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                     .bodyValue(requestBody)
                     .retrieve()
                     .bodyToMono(String.class)
                     .block();
         } catch (Exception e) {
-            content = "Sorry, I am currently unable to provide an AI insight due to an error.";
+            content = getStaticFallback(systemPrompt);
         }
 
         return AiAgentResponse.builder()
@@ -67,6 +71,22 @@ public class StaticInsightProvider implements AiProvider {
                 .build();
     }
 
+    private String getStaticFallback(String systemPrompt) {
+        if (systemPrompt == null) return "I'm a static AI coach. I'm here to help you hit those PRs!";
+        if (systemPrompt.contains("weekly training data")) {
+            return "Great job this week! You logged some solid workouts. Try to maintain this consistency next week for optimal results.";
+        } else if (systemPrompt.contains("Summarize the completed workout")) {
+            return "Solid workout! You hit some great volume today. Keep this momentum going.";
+        } else if (systemPrompt.contains("3 alternative exercises")) {
+            return "1. Goblet Squat\n2. Leg Press\n3. Bulgarian Split Squat";
+        } else if (systemPrompt.contains("daily check-in note")) {
+            return "Consistency is key. Keep pushing yourself and stay hydrated!";
+        } else if (systemPrompt.contains("macronutrients")) {
+            return "{\"calories\": 600, \"proteinGram\": 45, \"carbsGram\": 50, \"fatGram\": 20}";
+        }
+        return "I'm a static AI coach. I'm here to help you hit those PRs!";
+    }
+
     @Override
     public Flux<String> stream(String systemPrompt, String userPrompt) {
         Map<String, Object> requestBody = Map.of(
@@ -75,18 +95,17 @@ public class StaticInsightProvider implements AiProvider {
                 Map.of("role", "user", "content", userPrompt)
             )
         );
-        
+
         return webClient.post()
                 .uri("/")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
                 .retrieve()
-                .bodyToMono(String.class)
-                .flatMapMany(fullText -> {
-                    // Split the text into tokens keeping spaces and newlines
-                    String[] tokens = fullText.split("(?<=\\s|\\n)");
-                    return Flux.fromArray(tokens)
-                            .delayElements(Duration.ofMillis(30));
-                })
-                .onErrorResume(e -> Flux.just("Sorry, I am currently unable to provide an AI insight."));
+                .bodyToFlux(String.class)
+                .onErrorResume(e -> {
+                    String fallback = "Hello! I am your static AI coach. Since you're running locally without a valid AI API key, and the free provider failed, I'm providing this mock response. You're doing great with your training! Keep logging those workouts.";
+                    String[] tokens = fallback.split("(?<=\\s|\\n)");
+                    return Flux.fromArray(tokens).delayElements(Duration.ofMillis(30));
+                });
     }
 }
