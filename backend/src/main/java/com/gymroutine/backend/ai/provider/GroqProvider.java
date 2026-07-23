@@ -27,7 +27,7 @@ public class GroqProvider implements AiProvider {
     private static final String PROVIDER_NAME = "GROQ";
     private static final String BASE_URL = "https://api.groq.com/openai/v1";
     private static final String MODEL = "llama-3.3-70b-versatile";
-    private static final String FAST_MODEL = "llama-3.1-8b-instant";
+    private static final String FAST_MODEL = "llama3-8b-8192";
 
     @Value("${ai.groq.api-key:}")
     private String apiKey;
@@ -38,8 +38,8 @@ public class GroqProvider implements AiProvider {
 
     public GroqProvider(CircuitBreakerRegistry circuitBreakerRegistry, WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
         this.circuitBreakerRegistry = circuitBreakerRegistry;
-        HttpClient httpClient = HttpClient.create().responseTimeout(Duration.ofSeconds(15));
-        this.webClient = webClientBuilder.baseUrl(BASE_URL)
+        HttpClient httpClient = HttpClient.create().option(io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS, 2000).responseTimeout(Duration.ofSeconds(15));
+        this.webClient = webClientBuilder.clone().baseUrl(BASE_URL)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
         this.objectMapper = objectMapper;
@@ -114,7 +114,7 @@ public class GroqProvider implements AiProvider {
         }
 
         Map<String, Object> requestBody = Map.of(
-            "model", FAST_MODEL,
+            "model", MODEL,
             "messages", List.of(
                 Map.of("role", "system", "content", systemPrompt),
                 Map.of("role", "user", "content", userPrompt)
@@ -129,24 +129,21 @@ public class GroqProvider implements AiProvider {
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToFlux(String.class)
-                .mapNotNull(chunk -> {
-                    if (chunk.startsWith("data: ")) {
-                        chunk = chunk.substring(6);
-                    } else if (chunk.startsWith("data:")) {
-                        chunk = chunk.substring(5);
-                    }
-                    chunk = chunk.trim();
-                    if (chunk.isEmpty() || chunk.equals("[DONE]")) {
-                        return null;
-                    }
+                .flatMapIterable(chunk -> java.util.Arrays.asList(chunk.split("\\r?\\n")))
+                .mapNotNull(line -> {
+                    line = line.trim();
+                    log.info("Groq stream line: {}", line);
+                    if (line.isEmpty()) return null;
+                    String data = line.startsWith("data:") ? line.substring(5).trim() : line;
+                    if (data.isEmpty() || data.equals("[DONE]")) return null;
                     try {
-                        JsonNode node = objectMapper.readTree(chunk);
+                        JsonNode node = objectMapper.readTree(data);
                         JsonNode delta = node.path("choices").get(0).path("delta");
                         if (delta.has("content")) {
                             return delta.get("content").asText();
                         }
                     } catch (Exception e) {
-                        // ignore parsing errors for partial chunks
+                        // ignore parsing errors for partial JSON chunks
                     }
                     return null;
                 })

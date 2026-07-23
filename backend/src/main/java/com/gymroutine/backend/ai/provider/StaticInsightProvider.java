@@ -17,7 +17,7 @@ public class StaticInsightProvider implements AiProvider {
     public StaticInsightProvider(WebClient.Builder webClientBuilder) {
         reactor.netty.http.client.HttpClient httpClient = reactor.netty.http.client.HttpClient.create()
                 .responseTimeout(Duration.ofSeconds(15));
-        this.webClient = webClientBuilder.baseUrl("https://text.pollinations.ai")
+        this.webClient = webClientBuilder.clone().baseUrl("https://text.pollinations.ai")
                 .clientConnector(new org.springframework.http.client.reactive.ReactorClientHttpConnector(httpClient))
                 .defaultHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
                 .build();
@@ -42,25 +42,7 @@ public class StaticInsightProvider implements AiProvider {
     public AiAgentResponse complete(String systemPrompt, String userPrompt) {
         long startTime = System.currentTimeMillis();
         
-        Map<String, Object> requestBody = Map.of(
-            "messages", List.of(
-                Map.of("role", "system", "content", systemPrompt),
-                Map.of("role", "user", "content", userPrompt)
-            )
-        );
-
-        String content;
-        try {
-            content = webClient.post()
-                    .uri("/")
-                    .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
-        } catch (Exception e) {
-            content = getStaticFallback(systemPrompt);
-        }
+        String content = getStaticFallback(systemPrompt);
 
         return AiAgentResponse.builder()
                 .content(content)
@@ -89,23 +71,8 @@ public class StaticInsightProvider implements AiProvider {
 
     @Override
     public Flux<String> stream(String systemPrompt, String userPrompt) {
-        Map<String, Object> requestBody = Map.of(
-            "messages", List.of(
-                Map.of("role", "system", "content", systemPrompt),
-                Map.of("role", "user", "content", userPrompt)
-            )
-        );
-
-        return webClient.post()
-                .uri("/")
-                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                .bodyValue(requestBody)
-                .retrieve()
-                .bodyToFlux(String.class)
-                .onErrorResume(e -> {
-                    String fallback = "Hello! I am your static AI coach. Since you're running locally without a valid AI API key, and the free provider failed, I'm providing this mock response. You're doing great with your training! Keep logging those workouts.";
-                    String[] tokens = fallback.split("(?<=\\s|\\n)");
-                    return Flux.fromArray(tokens).delayElements(Duration.ofMillis(30));
-                });
+        String fallback = "Hello! I am your static AI coach. Since you're running locally without a valid AI API key, and the free provider failed, I'm providing this mock response. You're doing great with your training! Keep logging those workouts.";
+        String[] tokens = fallback.split("(?<=\\s|\\n)");
+        return Flux.fromArray(tokens).delayElements(Duration.ofMillis(30));
     }
 }

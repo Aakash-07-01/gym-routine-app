@@ -37,8 +37,8 @@ public class MistralProvider implements AiProvider {
 
     public MistralProvider(CircuitBreakerRegistry circuitBreakerRegistry, WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
         this.circuitBreakerRegistry = circuitBreakerRegistry;
-        HttpClient httpClient = HttpClient.create().responseTimeout(Duration.ofSeconds(15));
-        this.webClient = webClientBuilder.baseUrl(BASE_URL)
+        HttpClient httpClient = HttpClient.create().option(io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS, 2000).responseTimeout(Duration.ofSeconds(15));
+        this.webClient = webClientBuilder.clone().baseUrl(BASE_URL)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
         this.objectMapper = objectMapper;
@@ -128,18 +128,14 @@ public class MistralProvider implements AiProvider {
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToFlux(String.class)
-                .mapNotNull(chunk -> {
-                    if (chunk.startsWith("data: ")) {
-                        chunk = chunk.substring(6);
-                    } else if (chunk.startsWith("data:")) {
-                        chunk = chunk.substring(5);
-                    }
-                    chunk = chunk.trim();
-                    if (chunk.isEmpty() || chunk.equals("[DONE]")) {
-                        return null;
-                    }
+                .flatMapIterable(chunk -> java.util.Arrays.asList(chunk.split("\\r?\\n")))
+                .mapNotNull(line -> {
+                    line = line.trim();
+                    if (line.isEmpty()) return null;
+                    String data = line.startsWith("data:") ? line.substring(5).trim() : line;
+                    if (data.isEmpty() || data.equals("[DONE]")) return null;
                     try {
-                        JsonNode node = objectMapper.readTree(chunk);
+                        JsonNode node = objectMapper.readTree(data);
                         JsonNode delta = node.path("choices").get(0).path("delta");
                         if (delta.has("content")) {
                             return delta.get("content").asText();

@@ -125,26 +125,23 @@ public class AiAgentOrchestrator {
         AiAgentContext context = contextBuilder.buildChatContext(userId);
         String systemPrompt = promptEngine.aiCoachSystem(context);
 
+        Flux<String> result = Flux.error(new AiProviderException("Initial trigger"));
+
         for (AiProvider provider : providers) {
             if (provider.isAvailable()) {
-                try {
-                    // #region agent log
-                    try (java.io.FileWriter fw = new java.io.FileWriter("E:\\Anti gravity\\gym-routine-app - Copy\\debug-4426f5.log", true)) {
-                        fw.write("{\"sessionId\":\"4426f5\",\"location\":\"AiAgentOrchestrator.java:streamChat\",\"message\":\"using provider\",\"data\":{\"provider\":\"" + provider.getProviderName() + "\"},\"timestamp\":" + System.currentTimeMillis() + ",\"hypothesisId\":\"D\"}\n");
-                    } catch (Exception ignored) {}
-                    // #endregion
-                    return provider.stream(systemPrompt, userMessage);
-                } catch (Exception e) {
-                    log.warn("Provider {} failed to stream. Trying next.", provider.getProviderName());
-                }
+                Flux<String> providerFlux = Flux.defer(() -> provider.stream(systemPrompt, userMessage));
+                result = result.onErrorResume(e -> {
+                    log.warn("Trying provider: {}", provider.getProviderName());
+                    return providerFlux;
+                });
             }
         }
-        // #region agent log
-        try (java.io.FileWriter fw = new java.io.FileWriter("E:\\Anti gravity\\gym-routine-app - Copy\\debug-4426f5.log", true)) {
-            fw.write("{\"sessionId\":\"4426f5\",\"location\":\"AiAgentOrchestrator.java:streamChat\",\"message\":\"fallback static provider\",\"data\":{},\"timestamp\":" + System.currentTimeMillis() + ",\"hypothesisId\":\"D\"}\n");
-        } catch (Exception ignored) {}
-        // #endregion
-        return staticProvider.stream(systemPrompt, userMessage);
+        
+        Flux<String> staticFlux = Flux.defer(() -> staticProvider.stream(systemPrompt, userMessage));
+        return result.onErrorResume(e -> {
+            log.warn("Falling back to static provider");
+            return staticFlux;
+        }).doOnNext(token -> log.info("EMITTING TOKEN TO CLIENT: '{}'", token));
     }
 
     public String generateNoteInsight(String userNote) {

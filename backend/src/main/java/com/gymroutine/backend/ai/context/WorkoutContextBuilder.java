@@ -47,11 +47,16 @@ public class WorkoutContextBuilder {
         
         contextText.append(String.format("SESSIONS THIS WEEK (%d sessions):\n", logs.size()));
         
+        List<ExerciseSession> allSessions = logs.isEmpty() ? List.of() : sessionRepo.findAllByWorkoutLogIn(logs);
+        java.util.Map<Long, List<ExerciseSession>> sessionsByLog = allSessions.stream()
+                .filter(s -> s.getWorkoutLog() != null)
+                .collect(Collectors.groupingBy(s -> s.getWorkoutLog().getId()));
+        
         for (WorkoutLog log : logs) {
             contextText.append(String.format("  %s — (%s)\n", 
                 log.getDayName(), log.getCompletedAt().format(DateTimeFormatter.ofPattern("EEE MMM dd"))));
             
-            List<ExerciseSession> sessions = sessionRepo.findAllByWorkoutLog(log);
+            List<ExerciseSession> sessions = sessionsByLog.getOrDefault(log.getId(), List.of());
             for (ExerciseSession session : sessions) {
                 contextText.append(String.format("    - %s: %dx%d @ %.1fkg\n", 
                     session.getExerciseName(), session.getSetsCompleted(), session.getRepsPerSet(), session.getWeightUsed()));

@@ -26,8 +26,8 @@ public class GeminiProvider implements AiProvider {
     private static final Logger log = LoggerFactory.getLogger(GeminiProvider.class);
     private static final String PROVIDER_NAME = "GEMINI";
     private static final String BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
-    private static final String MODEL = "gemini-2.0-flash-lite";
-    private static final String STREAM_MODEL = "gemini-1.5-flash-8b";
+    private static final String MODEL = "gemini-1.5-pro";
+    private static final String STREAM_MODEL = "gemini-1.5-flash";
 
     @Value("${ai.gemini.api-key:}")
     private String apiKey;
@@ -38,8 +38,8 @@ public class GeminiProvider implements AiProvider {
 
     public GeminiProvider(CircuitBreakerRegistry circuitBreakerRegistry, WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
         this.circuitBreakerRegistry = circuitBreakerRegistry;
-        HttpClient httpClient = HttpClient.create().responseTimeout(Duration.ofSeconds(15));
-        this.webClient = webClientBuilder.baseUrl(BASE_URL)
+        HttpClient httpClient = HttpClient.create().option(io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS, 2000).responseTimeout(Duration.ofSeconds(15));
+        this.webClient = webClientBuilder.clone().baseUrl(BASE_URL)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .build();
         this.objectMapper = objectMapper;
@@ -122,18 +122,14 @@ public class GeminiProvider implements AiProvider {
                 .bodyValue(requestBody)
                 .retrieve()
                 .bodyToFlux(String.class)
-                .mapNotNull(chunk -> {
-                    if (chunk.startsWith("data: ")) {
-                        chunk = chunk.substring(6);
-                    } else if (chunk.startsWith("data:")) {
-                        chunk = chunk.substring(5);
-                    }
-                    chunk = chunk.trim();
-                    if (chunk.isEmpty() || chunk.equals("[DONE]")) {
-                        return null;
-                    }
+                .flatMapIterable(chunk -> java.util.Arrays.asList(chunk.split("\\r?\\n")))
+                .mapNotNull(line -> {
+                    line = line.trim();
+                    if (line.isEmpty()) return null;
+                    String data = line.startsWith("data:") ? line.substring(5).trim() : line;
+                    if (data.isEmpty() || data.equals("[DONE]")) return null;
                     try {
-                        JsonNode node = objectMapper.readTree(chunk);
+                        JsonNode node = objectMapper.readTree(data);
                         if (node.has("candidates") && node.get("candidates").isArray() && node.get("candidates").size() > 0) {
                             JsonNode parts = node.get("candidates").get(0).path("content").path("parts");
                             if (parts.isArray() && parts.size() > 0) {
