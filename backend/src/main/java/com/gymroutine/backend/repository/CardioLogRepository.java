@@ -9,7 +9,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface CardioLogRepository extends JpaRepository<CardioLog, Long> {
+public interface
+CardioLogRepository extends JpaRepository<CardioLog, Long> {
     List<CardioLog> findAllByUser(User user);
 
     List<CardioLog> findAllByUserAndDateLoggedAfter(User user, LocalDateTime date);

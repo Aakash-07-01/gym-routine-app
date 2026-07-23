@@ -12,7 +12,9 @@ import java.util.List;
 public interface WorkoutLogRepository extends JpaRepository<WorkoutLog, Long> {
     List<WorkoutLog> findByUserIdAndCompletedAtAfter(Long userId, LocalDateTime startDate);
 
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = "workoutDay")
     List<WorkoutLog> findAllByUserOrderByCompletedAtDesc(User user);
 
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = "workoutDay")
     List<WorkoutLog> findAllByUserAndCompletedAtAfterOrderByCompletedAtDesc(User user, LocalDateTime after);
 }

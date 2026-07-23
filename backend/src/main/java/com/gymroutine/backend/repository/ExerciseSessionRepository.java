@@ -14,4 +14,6 @@ public interface ExerciseSessionRepository extends JpaRepository<ExerciseSession
     List<ExerciseSession> findAllByUserOrderByCompletedAtAsc(User user);
 
     List<ExerciseSession> findAllByWorkoutLog(com.gymroutine.backend.model.WorkoutLog workoutLog);
+
+    List<ExerciseSession> findAllByWorkoutLogIn(List<com.gymroutine.backend.model.WorkoutLog> workoutLogs);
 }
